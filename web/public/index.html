@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eclissi 12 agosto 2026 — dove guardarla in Piemonte</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<style>
+  :root{--bg:#0e1116;--panel:#161b23;--line:#2a323d;--txt:#e6edf3;--dim:#8b98a8;--acc:#4ade80}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
+    font:14px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  #map{position:absolute;inset:0 0 0 340px}
+  #side{position:absolute;left:0;top:0;bottom:0;width:340px;overflow-y:auto;
+    background:var(--panel);border-right:1px solid var(--line);padding:16px}
+  h1{font-size:17px;margin:0 0 2px}
+  .sub{color:var(--dim);font-size:12px;margin-bottom:14px}
+  .card{background:#1b212b;border:1px solid var(--line);border-radius:8px;padding:11px;margin-bottom:12px}
+  .card h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin:0 0 8px}
+  .kv{display:flex;justify-content:space-between;gap:8px;padding:2px 0}
+  .kv b{font-variant-numeric:tabular-nums;font-weight:600}
+  .big{font-size:26px;font-weight:700;color:var(--acc);font-variant-numeric:tabular-nums}
+  .legend{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:6px 0 4px}
+  .legend i{flex:1}
+  .lab{display:flex;justify-content:space-between;color:var(--dim);font-size:11px}
+  ol{margin:0;padding-left:22px}
+  ol li{padding:3px 0;cursor:pointer}
+  ol li:hover{color:var(--acc)}
+  .pill{font-size:11px;color:var(--dim)}
+  label{display:flex;align-items:center;gap:7px;margin:5px 0;font-size:13px;cursor:pointer}
+  input[type=range]{width:100%}
+  .hint{color:var(--dim);font-size:12px}
+  .maplibregl-popup-content{background:#1b212b;color:var(--txt);border:1px solid var(--line);
+    border-radius:8px;font:13px/1.4 system-ui;padding:10px 12px}
+</style>
+</head>
+<body>
+<div id="side">
+  <h1>Eclissi del 12 agosto 2026</h1>
+  <div class="sub">Dove il Sole eclissato resta sopra l'orizzonte reale — Piemonte e dintorni</div>
+
+  <div class="card">
+    <h2>Punto selezionato</h2>
+    <div id="sel-empty" class="hint">Clicca sulla mappa per analizzare un punto.</div>
+    <div id="sel" style="display:none">
+      <div class="big"><span id="v-obsc">–</span>%</div>
+      <div class="pill" style="margin-bottom:8px">oscuramento massimo visibile</div>
+      <div class="kv"><span>Istante migliore</span><b id="v-time">–</b></div>
+      <div class="kv"><span>Ostacolo all'orizzonte</span><b id="v-hor">–</b></div>
+      <div class="kv"><span>Strada più vicina</span><b id="v-road">–</b></div>
+      <div class="kv"><span>Coordinate</span><b id="v-ll">–</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Scala</h2>
+    <div class="legend" id="legend"></div>
+    <div class="lab"><span>0%</span><span>50%</span><span>75%</span><span>95%</span></div>
+    <div class="hint" style="margin-top:8px">Il massimo teorico in Piemonte è ~94%. Il rosso non è
+      poco oscuramento: è il Sole già scomparso dietro i monti.</div>
+  </div>
+
+  <div class="card">
+    <h2>Livelli</h2>
+    <label><input type="checkbox" id="t-score" checked> Visibilità dell'eclissi</label>
+    <label><input type="checkbox" id="t-access"> Distanza dalle strade</label>
+    <label><input type="checkbox" id="t-sites" checked> Migliori 20 postazioni</label>
+    <div class="pill" style="margin-top:8px">Opacità</div>
+    <input type="range" id="op" min="0" max="100" value="75">
+  </div>
+
+  <div class="card">
+    <h2>Migliori postazioni raggiungibili</h2>
+    <ol id="list"></ol>
+  </div>
+
+  <div class="card">
+    <h2>Come è calcolato</h2>
+    <div class="hint">
+      Efemeridi Sole/Luna (astronomy-engine), oscuramento come frazione di area del disco.
+      Orizzonte da DEM Copernicus GLO-90 a 90 m con raycast su 28 azimut, curvatura terrestre
+      e rifrazione (R = 7/6 R⊕). Un punto vale il massimo oscuramento raggiunto
+      <i>mentre</i> il Sole è ancora sopra il proprio skyline. Griglia 180 m.
+    </div>
+  </div>
+</div>
+<div id="map"></div>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+
+// stessa rampa di 06_export.py
+const STOPS = [[0,[140,22,22]],[50,[200,90,30]],[75,[225,190,60]],[88,[120,190,70]],[94,[30,200,120]]];
+function ramp(v){
+  let a=STOPS[0], b=STOPS[STOPS.length-1];
+  for(let i=0;i<STOPS.length-1;i++){ if(v>=STOPS[i][0]&&v<=STOPS[i+1][0]){a=STOPS[i];b=STOPS[i+1];break;} }
+  const t = b[0]===a[0]?0:(v-a[0])/(b[0]-a[0]);
+  return [0,1,2].map(k=>Math.round(a[1][k]+t*(b[1][k]-a[1][k])));
+}
+(function(){
+  const L = $('#legend');
+  for(let i=0;i<=100;i++){
+    const s = document.createElement('i');
+    s.style.background = 'rgb('+ramp(i*0.95).join(',')+')';
+    L.appendChild(s);
+  }
+})();
+
+const map = new maplibregl.Map({
+  container:'map', center:[7.9,45.0], zoom:7.2, maxZoom:14,
+  style:{ version:8,
+    sources:{ osm:{ type:'raster', tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+      tileSize:256, attribution:'© OpenStreetMap · DEM Copernicus GLO-90' } },
+    layers:[{id:'osm',type:'raster',source:'osm',
+      paint:{'raster-saturation':-0.7,'raster-brightness-max':0.85}}]
+  }
+});
+
+let META=null, DATA=null, ACC=null;
+
+// addSource fallisce se lo style non e' ancora caricato: va atteso come gli altri.
+const mapReady = new Promise(res => map.on('load', res));
+
+// Il canvas viene dimensionato alla creazione, quando il layout puo' non
+// essere ancora definitivo: senza questo la mappa resta piu' piccola del box.
+mapReady.then(() => map.resize());
+window.addEventListener('resize', () => map.resize());
+new ResizeObserver(() => map.resize()).observe(document.getElementById('map'));
+
+Promise.all([
+  fetch('data/meta.json').then(r=>r.json()),
+  fetch('data/sites.geojson').then(r=>r.json()),
+  loadImageData('data/data.png'),
+  loadImageData('data/access.png'),
+  mapReady
+]).then(([meta, sites, img, acc])=>{
+  META=meta; DATA=img; ACC=acc;
+  const C = meta.corners_lonlat;
+
+  map.addSource('score', {type:'image', url:'data/score.png', coordinates:C});
+  map.addLayer({id:'score', type:'raster', source:'score',
+    paint:{'raster-opacity':0.75,'raster-resampling':'nearest'}});
+
+  map.addSource('access', {type:'image', url:'data/access.png', coordinates:C});
+  map.addLayer({id:'access', type:'raster', source:'access', paint:{'raster-opacity':0}});
+
+  map.addSource('sites', {type:'geojson', data:sites});
+  map.addLayer({id:'sites-halo', type:'circle', source:'sites',
+    paint:{'circle-radius':9,'circle-color':'#0e1116','circle-opacity':0.85}});
+  map.addLayer({id:'sites', type:'circle', source:'sites',
+    paint:{'circle-radius':5,'circle-color':'#4ade80',
+      'circle-stroke-width':1.5,'circle-stroke-color':'#0b3'}});
+
+  const L = $('#list');
+  sites.features.forEach(f=>{
+    const p=f.properties, c=f.geometry.coordinates, li=document.createElement('li');
+    li.innerHTML = '<b>'+p.oscuramento_pct+'%</b> · '+p.quota_m+' m · '+p.ora_massimo+
+      '<div class="pill">'+c[1].toFixed(4)+', '+c[0].toFixed(4)+
+      ' · strada a '+p.dist_strada_m+' m</div>';
+    li.onclick = ()=>{ map.flyTo({center:c, zoom:12}); inspect(c); };
+    L.appendChild(li);
+  });
+
+  map.on('click', e => inspect([e.lngLat.lng, e.lngLat.lat]));
+});
+
+function loadImageData(url){
+  return new Promise((res,rej)=>{
+    const im = new Image(); im.crossOrigin='anonymous';
+    im.onload = ()=>{ const cv=document.createElement('canvas');
+      cv.width=im.width; cv.height=im.height;
+      const cx=cv.getContext('2d',{willReadFrequently:true});
+      cx.drawImage(im,0,0); res(cx.getImageData(0,0,im.width,im.height)); };
+    im.onerror = rej; im.src = url;
+  });
+}
+
+function lonLatTo3857(lon,lat){
+  const R=6378137;
+  return [R*lon*Math.PI/180, R*Math.log(Math.tan(Math.PI/4+lat*Math.PI/360))];
+}
+
+function pixelIndex(img, ll){
+  const [x,y] = lonLatTo3857(ll[0], ll[1]);
+  const [w,s,e,n] = META.bounds_3857;
+  const px = Math.floor((x-w)/(e-w)*img.width);
+  const py = Math.floor((n-y)/(n-s)*img.height);
+  if(px<0||py<0||px>=img.width||py>=img.height) return -1;
+  return (py*img.width+px)*4;
+}
+
+function inspect(ll){
+  if(!DATA||!META) return;
+  const i = pixelIndex(DATA, ll);
+  if(i<0 || DATA.data[i+3]===0) return;
+  const d = DATA.data;
+  const obsc = d[i]/2.55, tmin = d[i+1], hor = d[i+2]/4;
+
+  let road = 'fuori copertura';
+  const j = pixelIndex(ACC, ll);
+  if(j>=0 && ACC.data[j+3]!==0){
+    const m = ACC.data[j]*20;
+    road = m>=5000 ? '> 5 km' : (m<180 ? '< 180 m' : Math.round(m/10)*10+' m');
+  }
+
+  $('#sel-empty').style.display='none';
+  $('#sel').style.display='block';
+  $('#v-obsc').textContent = obsc.toFixed(1);
+  const hh = 19+Math.floor(tmin/60), mm = Math.round(tmin%60);
+  $('#v-time').textContent = obsc<0.5 ? 'mai visibile'
+    : String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+' CEST';
+  // Se il Sole non emerge mai, l'angolo registrato non esiste: mostrarlo come
+  // 0.00 farebbe leggere "orizzonte libero", che e' l'esatto contrario.
+  $('#v-hor').textContent = obsc<0.5 ? 'sempre coperto' : hor.toFixed(2)+'°';
+  $('#v-road').textContent = road;
+  $('#v-ll').textContent = ll[1].toFixed(4)+', '+ll[0].toFixed(4);
+
+  const col = obsc>=88?'#4ade80':obsc>=60?'#e1be3c':'#e07a4a';
+  new maplibregl.Popup({closeButton:false}).setLngLat(ll)
+    .setHTML('<b style="color:'+col+'">'+obsc.toFixed(1)+'%</b> di oscuramento visibile'+
+      '<br><span style="color:#8b98a8">ostacolo a '+hor.toFixed(2)+'° · strada a '+road+'</span>')
+    .addTo(map);
+}
+
+$('#op').oninput = e => {
+  const v = +e.target.value/100;
+  if($('#t-score').checked) map.setPaintProperty('score','raster-opacity',v);
+  if($('#t-access').checked) map.setPaintProperty('access','raster-opacity',v);
+};
+$('#t-score').onchange = e =>
+  map.setPaintProperty('score','raster-opacity', e.target.checked?+$('#op').value/100:0);
+$('#t-access').onchange = e =>
+  map.setPaintProperty('access','raster-opacity', e.target.checked?+$('#op').value/100:0);
+$('#t-sites').onchange = e => {
+  const v = e.target.checked?'visible':'none';
+  map.setLayoutProperty('sites','visibility',v);
+  map.setLayoutProperty('sites-halo','visibility',v);
+};
+</script>
+</body>
+</html>

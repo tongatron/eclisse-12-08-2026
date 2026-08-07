@@ -1,0 +1,15 @@
+# Ambiente Python
+.venv/
+__pycache__/
+*.pyc
+
+# Dati grezzi e derivati: rigenerabili con la pipeline, troppo grandi per git
+# (DEM tiles 154MB, PBF OSM 560MB, raster derivati 183MB).
+# Ancorato alla radice (/data/), altrimenti il pattern matcherebbe anche
+# web/public/data/ che invece e' il deliverable del sito e va committato.
+/data/
+
+# Documentazione con credenziali del server — non deve mai finire su GitHub
+ServerHP-ubuntu.md
+
+.DS_Store
