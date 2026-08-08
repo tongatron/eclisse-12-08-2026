@@ -6,12 +6,12 @@ presentazione sintetica del progetto, consulta il [README](README.md).
 ## Obiettivo del calcolo
 
 Per ogni cella dell'area italiana il progetto determina il massimo
-oscuramento dell'eclissi che è **effettivamente visibile**. Il Sole conta solo
+oscuramento dell'eclisse che è **effettivamente visibile**. Il Sole conta solo
 quando è sopra l'orizzonte locale, non soltanto sopra quello astronomico.
 
 Il risultato combina quindi:
 
-1. effemeridi locali dell'eclissi;
+1. effemeridi locali dell'eclisse;
 2. altezza e azimut del Sole nel tempo;
 3. profilo dell'orizzonte nella direzione del Sole;
 4. curvatura terrestre e rifrazione atmosferica.
@@ -42,7 +42,7 @@ pipeline/                  calcolo offline in Python
   01_download_dem.py       scarica il DEM Copernicus
   02_build_grid.py         mosaico e riproiezione
   03_horizon.py            raycast dell'orizzonte
-  04_score.py              geometria dell'eclissi e punteggio
+  04_score.py              geometria dell'eclisse e punteggio
   05_access.py             analisi stradale sperimentale
   06_export.py             export per il browser
 
@@ -118,7 +118,7 @@ pubblicato da GitHub Pages.
 
 - coerenza geometrica degli azimut e della convergenza dei meridiani;
 - effetto della curvatura/rifrazione;
-- coordinate e orari dell'eclissi;
+- coordinate e orari dell'eclisse;
 - intervallo e coerenza delle bande raster esportate.
 
 La validazione non scrive output persistenti. Va eseguita dopo ogni rigenerazione

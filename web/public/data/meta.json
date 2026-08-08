@@ -24,7 +24,7 @@
   ]
  ],
  "res_m": 600.0,
- "evento": "eclissi solare parziale 12 agosto 2026",
+ "evento": "eclisse solare parziale 12 agosto 2026",
  "codifica": "R=oscuramento%*2.55, G=minuti dopo 19:00 CEST, B=orizzonte*4 gradi",
  "codifica_elev": "elev: quota_m = R*256+G",
  "tiles": {

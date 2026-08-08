@@ -1,4 +1,4 @@
-# Eclissi 12 agosto 2026
+# Eclisse 12 agosto 2026
 
 [![Sito online](https://img.shields.io/badge/sito-online-4ade80?style=flat-square)](https://eclisse-12-08-2026.tongatron.org/)
 [![Deploy GitHub Pages](https://img.shields.io/badge/deploy-GitHub%20Pages-222?style=flat-square&logo=githubpages&logoColor=white)](https://eclisse-12-08-2026.tongatron.org/)
@@ -6,23 +6,23 @@
 [![Contenuti: CC BY 4.0](https://img.shields.io/badge/contenuti-CC%20BY%204.0-6b21a8?style=flat-square)](LICENSE-CONTENT.md)
 
 Mappa interattiva per capire **dove e quanto** sarà visibile dall'Italia
-l'eclissi solare parziale del 12 agosto 2026. Il calcolo considera sia la
-geometria dell'eclissi sia l'orizzonte reale: montagne, colline e tramonto.
+l'eclisse solare parziale del 12 agosto 2026. Il calcolo considera sia la
+geometria dell'eclisse sia l'orizzonte reale: montagne, colline e tramonto.
 
 **Guarda la mappa:** [eclisse-12-08-2026.tongatron.org](https://eclisse-12-08-2026.tongatron.org/)
 
-![Anteprima della mappa dell'eclissi solare del 12 agosto 2026 in Italia](docs/images/anteprima-mappa-eclissi.png)
+![Anteprima della mappa dell'eclisse solare del 12 agosto 2026 in Italia](docs/images/anteprima-mappa-eclisse.png)
 
 *Dettaglio su Torino: il pannello mostra copertura visibile, orari locali,
-quota, coordinate e la simulazione dell'eclissi nel punto selezionato.*
+quota, coordinate e la simulazione dell'eclisse nel punto selezionato.*
 
-![Dettaglio della mappa su Torino con pannello dei dati dell'eclissi](docs/images/dettaglio-torino-pannello-eclissi.png)
+![Dettaglio della mappa su Torino con pannello dei dati dell'eclisse](docs/images/dettaglio-torino-pannello-eclisse.png)
 
 ## In breve
 
 - Il punto migliore sulla terraferma è la costa nord-occidentale della
   Sardegna, fino al **98,8%** di oscuramento visibile.
-- In gran parte del Sud il Sole tramonta prima del massimo dell'eclissi.
+- In gran parte del Sud il Sole tramonta prima del massimo dell'eclisse.
 - Al Nord, dove il Sole è ancora sopra l'orizzonte, anche una cresta lontana
   può cambiare sensibilmente ciò che si vede.
 

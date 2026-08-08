@@ -1,4 +1,4 @@
-"""Parametri condivisi della pipeline. Eclissi solare parziale del 12 agosto 2026."""
+"""Parametri condivisi della pipeline. Eclisse solare parziale del 12 agosto 2026."""
 
 import pathlib
 

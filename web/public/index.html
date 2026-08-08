@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Eclissi 12 agosto 2026 — dove guardarla in Italia</title>
-<meta name="description" content="Mappa interattiva della visibilità reale dell'eclissi solare parziale del 12 agosto 2026 in Italia.">
+<title>Eclisse 12 agosto 2026 — dove guardarla in Italia</title>
+<meta name="description" content="Mappa interattiva della visibilità reale dell'eclisse solare parziale del 12 agosto 2026 in Italia.">
 <meta name="theme-color" content="#0d1117">
-<meta name="application-name" content="Punto Eclissi">
+<meta name="application-name" content="Punto Eclisse">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="dcterms.rights" content="© 2026 Giovanni Bindi — tongatron.org. Codice MIT; contenuti CC BY 4.0, salvo diversa indicazione.">
@@ -16,16 +16,16 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="it_IT">
-<meta property="og:site_name" content="Punto Eclissi">
-<meta property="og:title" content="Punto Eclissi — Eclissi solare del 12 agosto 2026 in Italia">
-<meta property="og:description" content="Scopri dove e quanto sarà visibile l'eclissi solare, tenendo conto dell'orizzonte reale.">
+<meta property="og:site_name" content="Punto Eclisse">
+<meta property="og:title" content="Punto Eclisse — Eclisse solare del 12 agosto 2026 in Italia">
+<meta property="og:description" content="Scopri dove e quanto sarà visibile l'eclisse solare, tenendo conto dell'orizzonte reale.">
 <meta property="og:url" content="https://eclisse-12-08-2026.tongatron.org/">
 <meta property="og:image" content="https://eclisse-12-08-2026.tongatron.org/eclisse-20260808.png">
 <meta property="og:image:width" content="1536">
 <meta property="og:image:height" content="1024">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Punto Eclissi — 12 agosto 2026">
-<meta name="twitter:description" content="Mappa interattiva della visibilità dell'eclissi solare in Italia.">
+<meta name="twitter:title" content="Punto Eclisse — 12 agosto 2026">
+<meta name="twitter:description" content="Mappa interattiva della visibilità dell'eclisse solare in Italia.">
 <meta name="twitter:image" content="https://eclisse-12-08-2026.tongatron.org/eclisse-20260808.png">
 <script defer src="https://analytics.tongatron.org/script.js" data-website-id="b42586e5-5854-4020-b493-ce3121f579ca"></script>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
@@ -140,14 +140,13 @@
 </head>
 <body>
 <div id="side">
-  <h1>Eclissi del 12 agosto 2026</h1>
+  <h1>Eclisse del 12 agosto 2026</h1>
   <div class="sub">Trova i migliori punti per vedere l’eclisse del 12 agosto in Italia</div>
 
   <div class="card">
     <h2>Cerca comune</h2>
     <input type="text" id="q-comune" placeholder="Es. Bardonecchia, Matera, Erice…" autocomplete="off">
     <div id="q-results"></div>
-    <div class="hint" style="margin-top:6px">Ricerca via Nominatim/OpenStreetMap, su tutto il territorio italiano.</div>
     <button id="locate-me" class="btn-play btn-locate" type="button" style="margin-top:10px">⌖ Usa la mia posizione</button>
     <div id="geo-status" class="hint geo-status" role="status" aria-live="polite">Facoltativo: il browser chiederà il consenso.</div>
   </div>
@@ -172,7 +171,7 @@
   </div>
 
   <div class="card" id="sim-card" style="display:none">
-    <h2>Simulazione dell'eclissi</h2>
+    <h2>Simulazione dell'eclisse</h2>
     <svg id="sim-chart" viewBox="0 0 300 120" preserveAspectRatio="none"></svg>
     <div style="display:flex;justify-content:flex-end;margin-top:8px">
       <button id="sim-play" type="button" class="btn-play">▶ Riproduci</button>
@@ -192,6 +191,11 @@
     <summary>Dettagli e opzioni</summary>
 
     <div class="card">
+      <h2>Opacità layer eclisse</h2>
+      <input type="range" id="op" min="0" max="100" value="75">
+    </div>
+
+    <div class="card">
       <h2>Scala</h2>
       <div class="legend" id="legend"></div>
       <div class="lab"><span>0%</span><span>50%</span><span>75%</span><span>95%</span></div>
@@ -203,11 +207,6 @@
         Il rosso non è poco oscuramento in sé: è il Sole già scomparso, sotto l'orizzonte o dietro
         un rilievo. In Sardegna il Sole è a <i>0,1° di altezza</i> nel momento migliore, quindi
         mezzo grado di collina costa dieci punti: conviene un orizzonte marino libero.</div>
-    </div>
-
-    <div class="card">
-      <h2>Opacità layer eclissi</h2>
-      <input type="range" id="op" min="0" max="100" value="75">
     </div>
 
     <div class="card">
@@ -615,7 +614,7 @@ if(window.matchMedia('(max-width: 768px) and (max-height: 460px)').matches){
   setPanel(false);
 }
 
-// --- Simulazione grafica dell'eclissi nel punto selezionato ---------------
+// --- Simulazione grafica dell'eclisse nel punto selezionato ---------------
 // Riusa la stessa formula di pipeline/04_score.py (astronomy-engine, stessa
 // libreria in versione JS). L'orizzonte usato e' un'unica soglia costante
 // (il "hor" gia' mostrato in "Punto selezionato"), non il profilo a 28
@@ -849,7 +848,7 @@ function updateSim(lat, lon, horDeg, maiVisibile){
       markVertical(SIM_CHART, crossI, '#e07a4a', orografico ? 'dietro i rilievi' : 'tramonto');
     } else {
       summary.innerHTML = 'Visibile da qui dalle <b>' + fmtHM(pts[segStart].t) + '</b> alle <b>' +
-        fmtHM(pts[segEnd].t) + "</b> (~" + durMin + " min): qui l'orizzonte non taglia l'eclissi, " +
+        fmtHM(pts[segEnd].t) + "</b> (~" + durMin + " min): qui l'orizzonte non taglia l'eclisse, " +
         'la fine è quella naturale del fenomeno.';
     }
   } else {

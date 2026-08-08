@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Punto Eclissi — 12 agosto 2026",
-  "short_name": "Punto Eclissi",
-  "description": "Mappa della visibilità reale dell'eclissi solare del 12 agosto 2026 in Italia.",
+  "name": "Punto Eclisse — 12 agosto 2026",
+  "short_name": "Punto Eclisse",
+  "description": "Mappa della visibilità reale dell'eclisse solare del 12 agosto 2026 in Italia.",
   "lang": "it",
   "start_url": "/",
   "scope": "/",

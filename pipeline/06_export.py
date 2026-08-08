@@ -241,7 +241,7 @@ def main() -> int:
         "bounds_3857": [west, ov_south, ov_east, north],
         "corners_lonlat": [[lw, ln], [le, ln], [le, ls], [lw, ls]],
         "res_m": RES_OVERVIEW,
-        "evento": "eclissi solare parziale 12 agosto 2026",
+        "evento": "eclisse solare parziale 12 agosto 2026",
         "codifica": "R=oscuramento%*2.55, G=minuti dopo 19:00 CEST, B=orizzonte*4 gradi",
         "codifica_elev": "elev: quota_m = R*256+G",
         "tiles": {

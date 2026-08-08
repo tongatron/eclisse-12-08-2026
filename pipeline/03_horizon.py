@@ -54,7 +54,7 @@ SCALE = 100.0  # int16 in centesimi di grado
 #
 # Il raggio si ferma a 150 km e non a 250 per un motivo fisico: con curvatura +
 # rifrazione, per ostruire il Sole a 2.6 gradi (la quota al massimo
-# dell'eclissi) servirebbe un rilievo entro 89 km; a 150 km il limite scende a
+# dell'eclisse) servirebbe un rilievo entro 89 km; a 150 km il limite scende a
 # ~1.2 gradi. Sotto 2.6 gradi il punteggio satura comunque, quindi il campo
 # oltre 150 km non puo' cambiare il risultato.
 PLAN = [(10_000.0, 0), (30_000.0, 1), (80_000.0, 2), (150_000.0, 3)]
