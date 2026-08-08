@@ -11,12 +11,12 @@ geometria dell'eclisse sia l'orizzonte reale: montagne, colline e tramonto.
 
 **Guarda la mappa:** [eclisse-12-08-2026.tongatron.org](https://eclisse-12-08-2026.tongatron.org/)
 
-![Anteprima della mappa dell'eclisse solare del 12 agosto 2026 in Italia](docs/images/anteprima-mappa-eclisse.png)
+![Anteprima della mappa dell'eclisse solare del 12 agosto 2026 in Italia](docs/images/anteprima-mappa-eclissi.png)
 
 *Dettaglio su Torino: il pannello mostra copertura visibile, orari locali,
 quota, coordinate e la simulazione dell'eclisse nel punto selezionato.*
 
-![Dettaglio della mappa su Torino con pannello dei dati dell'eclisse](docs/images/dettaglio-torino-pannello-eclisse.png)
+![Dettaglio della mappa su Torino con pannello dei dati dell'eclisse](docs/images/dettaglio-torino-pannello-eclissi.png)
 
 ## In breve
 
