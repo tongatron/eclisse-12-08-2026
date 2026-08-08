@@ -831,7 +831,6 @@ function updateSim(lat, lon, horDeg, maiVisibile){
   pts.forEach((p, i) => { if(p.visible && p.obsc > 0.001){ if(contactStart < 0) contactStart = i; contactEnd = i; } });
   $('#v-first').textContent = contactStart >= 0 ? fmtHM(pts[contactStart].t) + ' CEST' : 'mai visibile';
   $('#v-last').textContent = contactEnd >= 0 ? fmtHM(pts[contactEnd].t) + ' CEST' : 'mai visibile';
-  SIM_PLAY_RANGE = segStart >= 0 ? { start: segStart, end: crossI >= 0 ? crossI : segEnd } : null;
 
   if(segStart >= 0){
     const durMin = Math.round((pts[segEnd].t - pts[segStart].t) / 60000);
@@ -858,6 +857,10 @@ function updateSim(lat, lon, horDeg, maiVisibile){
   bindScrubOnce();
   let bestIdx = segStart >= 0 ? segStart : 0;
   pts.forEach((p, i) => { if(p.visible && p.obsc > pts[bestIdx].obsc) bestIdx = i; });
+  // La riproduzione si conclude al massimo oscuramento effettivamente
+  // visibile: il valore finale di "Oscuramento in quel momento" coincide
+  // quindi con il picco della simulazione per il punto selezionato.
+  SIM_PLAY_RANGE = segStart >= 0 ? { start: segStart, end: bestIdx } : null;
   scrubToIndex(bestIdx);
 }
 </script>
