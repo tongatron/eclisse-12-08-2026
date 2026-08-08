@@ -40,10 +40,11 @@ Per aggiornare i dati:
 
 ## Licenza
 
-Testi, visualizzazioni, immagini originali e codice di questo repository sono
-rilasciati con licenza [Creative Commons Attribuzione 4.0 Internazionale
-(CC BY 4.0)](LICENSE.md). I dati e i servizi di terze parti mantengono le rispettive licenze, riportate nella
-[documentazione tecnica](TECHNICAL.md#dati-e-attribuzioni).
+Il [codice](LICENSE) è rilasciato con licenza **MIT**. Testi,
+visualizzazioni e immagini originali sono rilasciati con licenza [Creative
+Commons Attribuzione 4.0 Internazionale (CC BY 4.0)](LICENSE-CONTENT.md).
+I dati e i servizi di terze parti mantengono le rispettive licenze, riportate
+nella [documentazione tecnica](TECHNICAL.md#dati-e-attribuzioni).
 
 ## Crediti
 
