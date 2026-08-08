@@ -4,7 +4,7 @@ Mappa della visibilità reale dell'eclissi solare parziale del 12 agosto 2026,
 tenendo conto degli ostacoli orografici. Copre l'intero territorio italiano,
 da Lampedusa al Brennero.
 
-**Live:** https://eclisse.tongatron.org
+**Live:** https://eclisse-12-08-2026.tongatron.org
 
 ---
 
@@ -657,7 +657,7 @@ dopo il fix, che ha spostato l'osservatore sulla cella più alta del blocco
 
 Sito statico servito da un container `nginx:alpine` (bind-mount di
 `web/public/`) sul server personale dell'autore, esposto pubblicamente via
-Cloudflare Tunnel su `eclisse.tongatron.org`. Il repository Git **non**
+Cloudflare Tunnel su `eclisse-12-08-2026.tongatron.org`. Il repository Git **non**
 contiene credenziali di accesso al server: la documentazione di deploy con
 IP/SSH/password è mantenuta in un file locale separato, deliberatamente
 escluso dal controllo di versione (vedi `.gitignore`).
@@ -680,5 +680,5 @@ con `?v=ASSET_V`, quindi basta cambiare quella costante perché il CDN veda
 URL nuovi. Verifica dopo il deploy:
 
 ```bash
-curl -s -o /dev/null -w '%{http_code} %{size_download}B\n' https://eclisse.tongatron.org/data/score.png?v=$(grep -o "ASSET_V = '[^']*'" web/public/index.html | cut -d"'" -f2)
+curl -s -o /dev/null -w '%{http_code} %{size_download}B\n' https://eclisse-12-08-2026.tongatron.org/data/score.png?v=$(grep -o "ASSET_V = '[^']*'" web/public/index.html | cut -d"'" -f2)
 ```
