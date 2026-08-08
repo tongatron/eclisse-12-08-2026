@@ -104,7 +104,7 @@ def bbox_3857(src_tr, src_crs, shape):
     return (max(full[0], ax0), max(full[1], ay0), min(full[2], ax1), min(full[3], ay1))
 
 
-def to_3857(arr, src_tr, src_crs, box, res):
+def to_3857(arr, src_tr, src_crs, box, res, resampling=Resampling.bilinear):
     """Riproietta su una griglia 3857 ancorata a `box`, alla risoluzione `res`."""
     west, south, east, north = box
     w = int(np.ceil((east - west) / res))
@@ -113,7 +113,7 @@ def to_3857(arr, src_tr, src_crs, box, res):
     out = np.full((h, w), np.nan, dtype="float32")
     reproject(
         source=arr, destination=out, src_transform=src_tr, src_crs=src_crs,
-        dst_transform=dst_tr, dst_crs="EPSG:3857", resampling=Resampling.bilinear,
+        dst_transform=dst_tr, dst_crs="EPSG:3857", resampling=resampling,
         src_nodata=np.nan, dst_nodata=np.nan,
     )
     return out
@@ -205,10 +205,22 @@ def main() -> int:
     png_write(WEB_PUBLIC / "score.png", np.dstack([ramp(pct), alpha]))
 
     # --- tasselli dati ---
-    o3 = to_3857(obsc, tr, crs, box, RES_TILE)
-    t3 = to_3857(tbest, tr, crs, box, RES_TILE)
-    h3 = to_3857(horu, tr, crs, box, RES_TILE)
-    e3 = to_3857(h_obs, tr, crs, box, RES_TILE)
+    # Nearest e non bilinear, al contrario della vista d'insieme. Qui ogni
+    # pixel e' un valore che l'utente legge come numero, e l'oscuramento
+    # visibile non e' un campo continuo: dipende da una soglia (il Sole sta
+    # sopra l'orizzonte o non ci sta). Mediando una cella bloccata con le
+    # vicine libere esce un numero che non corrisponde a nessun calcolo -
+    # Roma centro passava da 30.4% (orizzonte 3.01 gradi, valore vero a 180 m)
+    # a 60.0% (orizzonte 0.75), cioe' la media fra "coperto" e "scoperto".
+    # Nearest prende il valore della cella a 180 m piu' vicina: e' meno
+    # levigato ma e' un risultato realmente calcolato. Conserva anche il
+    # sentinella t_best = -1 dei punti mai visibili, che il bilineare
+    # spalmava sui vicini producendo percentuali piccole ma non nulle.
+    near = Resampling.nearest
+    o3 = to_3857(obsc, tr, crs, box, RES_TILE, near)
+    t3 = to_3857(tbest, tr, crs, box, RES_TILE, near)
+    h3 = to_3857(horu, tr, crs, box, RES_TILE, near)
+    e3 = to_3857(h_obs, tr, crs, box, RES_TILE, near)
     print(f"Griglia tasselli {o3.shape} @ {RES_TILE:.0f} m", flush=True)
 
     rows, cols = write_tiles(tile_dir, "data", encode_data(o3, t3, h3))

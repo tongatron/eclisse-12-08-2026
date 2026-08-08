@@ -185,7 +185,7 @@ const $ = s => document.querySelector(s);
 // l'HTML: dopo un deploy il browser riceveva index.html aggiornato insieme a
 // score.png vecchio di un'ora, cioe' la heatmap sbagliata stirata sui nuovi
 // angoli. Da alzare a ogni rigenerazione della pipeline.
-const ASSET_V = '20260808b';
+const ASSET_V = '20260808c';
 const v = url => url + (url.includes('?') ? '&' : '?') + 'v=' + ASSET_V;
 
 // stessa rampa di 06_export.py
