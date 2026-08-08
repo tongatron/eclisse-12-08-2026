@@ -4,6 +4,29 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Eclissi 12 agosto 2026 — dove guardarla in Italia</title>
+<meta name="description" content="Mappa interattiva della visibilità reale dell'eclissi solare parziale del 12 agosto 2026 in Italia.">
+<meta name="theme-color" content="#0e1116">
+<meta name="application-name" content="Punto Eclissi">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="dcterms.rights" content="© 2026 Giovanni Bindi — tongatron.org. CC BY 4.0, salvo diversa indicazione.">
+<link rel="canonical" href="https://eclisse.tongatron.org/">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="it_IT">
+<meta property="og:site_name" content="Punto Eclissi">
+<meta property="og:title" content="Punto Eclissi — Eclissi solare del 12 agosto 2026 in Italia">
+<meta property="og:description" content="Scopri dove e quanto sarà visibile l'eclissi solare, tenendo conto dell'orizzonte reale.">
+<meta property="og:url" content="https://eclisse.tongatron.org/">
+<meta property="og:image" content="https://eclisse.tongatron.org/eclisse.png">
+<meta property="og:image:width" content="1536">
+<meta property="og:image:height" content="1024">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Punto Eclissi — 12 agosto 2026">
+<meta name="twitter:description" content="Mappa interattiva della visibilità dell'eclissi solare in Italia.">
+<meta name="twitter:image" content="https://eclisse.tongatron.org/eclisse.png">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
   :root{--bg:#0e1116;--panel:#161b23;--line:#2a323d;--txt:#e6edf3;--dim:#8b98a8;--acc:#4ade80}
@@ -49,6 +72,14 @@
     padding:5px 12px;font-size:12px;cursor:pointer}
   .btn-play:hover{border-color:var(--acc);color:var(--acc)}
   .btn-play:disabled{opacity:.4;cursor:default;border-color:var(--line);color:var(--txt)}
+  footer{border-top:1px solid var(--line);margin:18px -16px -16px;padding:12px 16px 18px;
+    color:var(--dim);font-size:11px}
+  footer a{color:var(--acc);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+  footer p{margin:0 0 6px}
+  footer details{margin-top:8px}
+  footer summary{cursor:pointer;color:var(--txt)}
+  footer details p{margin:7px 0 0}
 
   /* Maniglia mobile: la regola sta fuori dal media query perche' il pulsante
      esiste sempre nel DOM (nascosto da desktop) e il suo listener si registra
@@ -169,6 +200,16 @@
       arrivano da tasselli a 250 m scaricati solo per la zona che stai guardando.
     </div>
   </div>
+
+  <footer>
+    <p>Un progetto di <a href="https://tongatron.org" target="_blank" rel="noopener noreferrer">tongatron.org</a></p>
+    <p>© 2026 Giovanni Bindi · <a href="https://creativecommons.org/licenses/by/4.0/deed.it" target="_blank" rel="license noopener noreferrer">CC BY 4.0</a></p>
+    <details>
+      <summary>Uso di immagini e contenuti</summary>
+      <p>Testi, visualizzazioni, immagini originali e codice di questo sito sono rilasciati con licenza CC BY 4.0, salvo diversa indicazione. Puoi riutilizzarli anche a fini commerciali, citando chiaramente: <b>Giovanni Bindi — tongatron.org</b>, con link alla licenza e indicazione delle modifiche.</p>
+      <p>I dati, le mappe di base, i servizi e i marchi di terzi restano soggetti alle rispettive licenze e condizioni d'uso; non sono concessi da questa licenza.</p>
+    </details>
+  </footer>
 </div>
 <div id="map"></div>
 <button id="panel-toggle" type="button" aria-controls="side" aria-expanded="true">
@@ -180,6 +221,10 @@
 <script src="https://unpkg.com/astronomy-engine@2.1.19/astronomy.browser.js"></script>
 <script>
 const $ = s => document.querySelector(s);
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+}
 
 // Versione degli asset dati. Cloudflare mette in cache i file statici ma non
 // l'HTML: dopo un deploy il browser riceveva index.html aggiornato insieme a
