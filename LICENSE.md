@@ -3,7 +3,7 @@
 Copyright © 2026 Giovanni Bindi.
 
 Testi, visualizzazioni, immagini originali e codice di questo repository sono
-rilasciati con licenza [Creative Commons Attribution 4.0 International
+rilasciati con licenza [Creative Commons Attribuzione 4.0 Internazionale
 (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.it).
 
 Puoi condividere e adattare il materiale, anche per fini commerciali, a

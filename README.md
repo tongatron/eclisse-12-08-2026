@@ -41,8 +41,8 @@ Per aggiornare i dati:
 ## Licenza
 
 Testi, visualizzazioni, immagini originali e codice di questo repository sono
-rilasciati con licenza [CC BY 4.0](LICENSE.md). I dati e i servizi di terze
-parti mantengono le rispettive licenze, riportate nella
+rilasciati con licenza [Creative Commons Attribuzione 4.0 Internazionale
+(CC BY 4.0)](LICENSE.md). I dati e i servizi di terze parti mantengono le rispettive licenze, riportate nella
 [documentazione tecnica](TECHNICAL.md#dati-e-attribuzioni).
 
 ## Crediti
