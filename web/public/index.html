@@ -576,8 +576,7 @@ async function inspect(ll, {updateUrl=true}={}){
   showPopup(ll)
     .setHTML('<b style="color:'+col+'">'+(mai ? '0.0' : obsc.toFixed(1))+'%</b> di oscuramento visibile'+
       '<br><span style="color:#8b98a8">Istante migliore: '+$('#v-time').textContent+'</span>'+
-      '<br><span style="color:#8b98a8">Ultimo contatto locale: '+$('#v-last').textContent+'</span>')
-    .addTo(map);
+      '<br><span style="color:#8b98a8">Ultimo contatto locale: '+$('#v-last').textContent+'</span>');
 }
 
 let CURRENT_SHARE_URL = null;
