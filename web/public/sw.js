@@ -1,10 +1,10 @@
-const CACHE = 'punto-eclissi-shell-v1';
+const CACHE = 'punto-eclissi-shell-v2';
 const SHELL = [
   './',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './eclisse.png'
+  './eclisse-20260808.png'
 ];
 
 self.addEventListener('install', event => {
