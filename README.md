@@ -1,5 +1,10 @@
 # Eclissi 12 agosto 2026
 
+[![Sito online](https://img.shields.io/badge/sito-online-4ade80?style=flat-square)](https://eclisse-12-08-2026.tongatron.org/)
+[![Deploy GitHub Pages](https://img.shields.io/badge/deploy-GitHub%20Pages-222?style=flat-square&logo=githubpages&logoColor=white)](https://eclisse-12-08-2026.tongatron.org/)
+[![Codice: MIT](https://img.shields.io/badge/codice-MIT-2563eb?style=flat-square)](LICENSE)
+[![Contenuti: CC BY 4.0](https://img.shields.io/badge/contenuti-CC%20BY%204.0-6b21a8?style=flat-square)](LICENSE-CONTENT.md)
+
 Mappa interattiva per capire **dove e quanto** sarà visibile dall'Italia
 l'eclissi solare parziale del 12 agosto 2026. Il calcolo considera sia la
 geometria dell'eclissi sia l'orizzonte reale: montagne, colline e tramonto.
