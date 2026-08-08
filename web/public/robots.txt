@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://eclisse-12-08-2026.tongatron.org/sitemap.xml

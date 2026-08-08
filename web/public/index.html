@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Eclisse 12 agosto 2026 — dove guardarla in Italia</title>
 <meta name="description" content="Mappa interattiva della visibilità reale dell'eclisse solare parziale del 12 agosto 2026 in Italia.">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <meta name="theme-color" content="#0d1117">
 <meta name="application-name" content="Punto Eclisse">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,13 +21,55 @@
 <meta property="og:title" content="Punto Eclisse — Eclisse solare del 12 agosto 2026 in Italia">
 <meta property="og:description" content="Scopri dove e quanto sarà visibile l'eclisse solare, tenendo conto dell'orizzonte reale.">
 <meta property="og:url" content="https://eclisse-12-08-2026.tongatron.org/">
-<meta property="og:image" content="https://eclisse-12-08-2026.tongatron.org/eclisse-20260808.png">
+<meta property="og:image" content="https://eclisse-12-08-2026.tongatron.org/ecli.png">
 <meta property="og:image:width" content="1536">
 <meta property="og:image:height" content="1024">
+<meta property="og:image:alt" content="Mappa della visibilità dell'eclisse solare del 12 agosto 2026 in Italia">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Punto Eclisse — 12 agosto 2026">
 <meta name="twitter:description" content="Mappa interattiva della visibilità dell'eclisse solare in Italia.">
-<meta name="twitter:image" content="https://eclisse-12-08-2026.tongatron.org/eclisse-20260808.png">
+<meta name="twitter:image" content="https://eclisse-12-08-2026.tongatron.org/ecli.png">
+<meta name="twitter:image:alt" content="Mappa della visibilità dell'eclisse solare del 12 agosto 2026 in Italia">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://eclisse-12-08-2026.tongatron.org/#website",
+      "url": "https://eclisse-12-08-2026.tongatron.org/",
+      "name": "Punto Eclisse",
+      "inLanguage": "it-IT"
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://eclisse-12-08-2026.tongatron.org/#webapp",
+      "url": "https://eclisse-12-08-2026.tongatron.org/",
+      "name": "Punto Eclisse",
+      "description": "Mappa interattiva della visibilità reale dell'eclisse solare parziale del 12 agosto 2026 in Italia.",
+      "applicationCategory": "TravelApplication",
+      "operatingSystem": "Web",
+      "inLanguage": "it-IT",
+      "isPartOf": { "@id": "https://eclisse-12-08-2026.tongatron.org/#website" }
+    },
+    {
+      "@type": "Event",
+      "@id": "https://eclisse-12-08-2026.tongatron.org/#event",
+      "name": "Eclisse solare parziale del 12 agosto 2026 in Italia",
+      "description": "Eclisse solare parziale visibile dall'Italia il 12 agosto 2026. La mappa mostra la copertura realmente osservabile, considerando l'orizzonte locale.",
+      "startDate": "2026-08-12T19:25:00+02:00",
+      "eventStatus": "https://schema.org/EventScheduled",
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+      "location": {
+        "@type": "Country",
+        "name": "Italia"
+      },
+      "image": "https://eclisse-12-08-2026.tongatron.org/ecli.png",
+      "url": "https://eclisse-12-08-2026.tongatron.org/"
+    }
+  ]
+}
+</script>
 <script defer src="https://analytics.tongatron.org/script.js" data-website-id="b42586e5-5854-4020-b493-ce3121f579ca"></script>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
@@ -146,7 +189,7 @@
 
   <div class="card">
     <h2>Cerca comune</h2>
-    <input type="text" id="q-comune" autocomplete="off">
+    <input type="text" id="q-comune" autocomplete="off" aria-label="Cerca un comune italiano" placeholder="Es. Alghero">
     <div id="q-results"></div>
     <button id="locate-me" class="btn-play btn-locate" type="button" style="margin-top:10px">⌖ Usa la mia posizione</button>
     <div id="geo-status" class="hint geo-status" role="status" aria-live="polite"></div>
