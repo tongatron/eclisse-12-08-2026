@@ -481,11 +481,47 @@ function showNoData(ll){
 // precedente: dopo qualche punto la mappa era tappezzata, e a pannello chiuso
 // su telefono i popup coprivano proprio la mappa che si voleva vedere.
 let CURRENT_POPUP = null;
+
+function resetSelection(){
+  CURRENT_POPUP = null;
+  CURRENT_SHARE_URL = null;
+  $('#sel').style.display = 'none';
+  $('#sim-card').style.display = 'none';
+  $('#sel-empty').style.display = 'block';
+  $('#sel-empty').textContent = 'Clicca sulla mappa per analizzare un punto.';
+  $('#v-obsc').textContent = '–';
+  $('#v-first').textContent = '–';
+  $('#v-time').textContent = '–';
+  $('#v-last').textContent = '–';
+  $('#v-elev').textContent = '–';
+  $('#v-ll').textContent = '–';
+  $('#v-gmaps').href = '#';
+  $('#v-share-msg').textContent = '';
+
+  // Il punto non e' piu' selezionato: non lasciare un link condivisibile
+  // nella barra degli indirizzi che riapra una posizione ormai chiusa.
+  const url = new URL(location.href);
+  url.searchParams.delete('lat');
+  url.searchParams.delete('lon');
+  history.replaceState(null, '', url);
+}
+
 function showPopup(ll){
-  if(CURRENT_POPUP) CURRENT_POPUP.remove();
-  CURRENT_POPUP = new maplibregl.Popup({closeButton:true, closeOnClick:false})
+  // Rimuovere un popup emette anche l'evento close: lo sganciamo prima,
+  // altrimenti il suo listener azzererebbe il pannello mentre si apre il
+  // popup del nuovo punto.
+  if(CURRENT_POPUP){
+    const previous = CURRENT_POPUP;
+    CURRENT_POPUP = null;
+    previous.remove();
+  }
+  const popup = new maplibregl.Popup({closeButton:true, closeOnClick:false})
     .setLngLat(ll).addTo(map);
-  return CURRENT_POPUP;
+  CURRENT_POPUP = popup;
+  popup.on('close', () => {
+    if(CURRENT_POPUP === popup) resetSelection();
+  });
+  return popup;
 }
 
 async function inspect(ll, {updateUrl=true}={}){
