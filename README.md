@@ -11,6 +11,8 @@ geometria dell'eclissi sia l'orizzonte reale: montagne, colline e tramonto.
 
 **Guarda la mappa:** [eclisse-12-08-2026.tongatron.org](https://eclisse-12-08-2026.tongatron.org/)
 
+![Anteprima della mappa dell'eclissi solare del 12 agosto 2026 in Italia](docs/images/anteprima-mappa-eclissi.png)
+
 ## In breve
 
 - Il punto migliore sulla terraferma è la costa nord-occidentale della
