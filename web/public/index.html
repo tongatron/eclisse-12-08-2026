@@ -148,11 +148,10 @@
     <div id="sel-empty" class="hint">Clicca sulla mappa per analizzare un punto.</div>
     <div id="sel" style="display:none">
       <div class="big"><span id="v-obsc">–</span>%</div>
-      <div class="pill" style="margin-bottom:8px">oscuramento massimo visibile</div>
+      <div class="pill" style="margin-bottom:8px">Massima copertura visibile</div>
       <div class="kv"><span>Primo contatto locale</span><b id="v-first">–</b></div>
       <div class="kv"><span>Istante migliore</span><b id="v-time">–</b></div>
       <div class="kv"><span>Ultimo contatto locale</span><b id="v-last">–</b></div>
-      <div class="kv"><span>Ostacolo all'orizzonte</span><b id="v-hor">–</b></div>
       <div class="kv"><span>Quota</span><b id="v-elev">–</b></div>
       <div class="kv"><span>Coordinate</span><b id="v-ll">–</b></div>
       <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:8px">
@@ -477,9 +476,6 @@ async function inspect(ll){
   const hh = 19+Math.floor(tmin/60), mm = Math.round(tmin%60);
   $('#v-time').textContent = mai ? 'mai visibile'
     : String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+' CEST';
-  // Se il Sole non emerge mai, l'angolo registrato non esiste: mostrarlo come
-  // 0.00 farebbe leggere "orizzonte libero", che e' l'esatto contrario.
-  $('#v-hor').textContent = mai ? 'sempre coperto' : hor.toFixed(2)+'°';
   $('#v-ll').textContent = ll[1].toFixed(4)+', '+ll[0].toFixed(4);
 
   $('#v-elev').textContent = e ? (e[0]*256 + e[1]) + ' m' : 'fuori copertura';
@@ -493,18 +489,12 @@ async function inspect(ll){
   $('#v-share-msg').textContent = '';
 
   const col = mai ? '#e07a4a' : obsc>=88?'#4ade80':obsc>=60?'#e1be3c':'#e07a4a';
-  // Con l'orizzonte quasi piatto non c'e' nessun "ostacolo": se l'oscuramento
-  // e' basso e' perche' il Sole tramonta prima del massimo, non per i monti.
-  const causa = mai ? "il Sole non emerge mai sopra l'orizzonte reale"
-    : hor >= 1.0 ? 'ostacolo a ' + hor.toFixed(2) + '°'
-    : "orizzonte libero: limita l'ora del tramonto";
+  updateSim(ll[1], ll[0], hor, mai);
   showPopup(ll)
     .setHTML('<b style="color:'+col+'">'+(mai ? '0.0' : obsc.toFixed(1))+'%</b> di oscuramento visibile'+
-      '<br><span style="color:#8b98a8">'+causa+'</span>'+
-      '<br><a href="'+gmaps+'" target="_blank" rel="noopener noreferrer" style="color:#4ade80;text-decoration:none">Apri in Google Maps ↗</a>')
+      '<br><span style="color:#8b98a8">Istante migliore: '+$('#v-time').textContent+'</span>'+
+      '<br><span style="color:#8b98a8">Ultimo contatto locale: '+$('#v-last').textContent+'</span>')
     .addTo(map);
-
-  updateSim(ll[1], ll[0], hor, mai);
 }
 
 let CURRENT_SHARE_URL = null;
