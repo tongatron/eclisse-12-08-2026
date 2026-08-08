@@ -125,12 +125,9 @@ ha dati validi**: sul mare il DEM vale 0 e l'orizzonte è libero, quindi
 l'oscuramento lì è calcolato e sensato. Dopo il ritaglio sull'AOI la griglia è
 7 × 6 tasselli e vengono scritti tutti.
 
-**I tasselli non sono versionati in git** (`.gitignore`): sono 84 file per
-~56 MB, riscritti da capo a ogni esecuzione della pipeline, e il deploy passa
-da `rsync` sulla copia locale, non da git. `score.png` e `meta.json` restano
-versionati. Conseguenza pratica: da un clone pulito il sito si apre e mostra
-la mappa, ma il click non trova i dati finché non si rigenera la pipeline (o
-si copiano i tasselli da una macchina che li ha).
+I tasselli sono versionati in Git insieme al sito: sono 84 file per circa
+47 MB. In questo modo un clone pulito e GitHub Pages contengono sempre anche i
+dati interrogati al click, senza dipendere da un server separato.
 
 ### Perché un raycast e non un viewshed a 360°
 
@@ -655,30 +652,15 @@ dopo il fix, che ha spostato l'osservatore sulla cella più alta del blocco
 
 ## 12. Deploy
 
-Sito statico servito da un container `nginx:alpine` (bind-mount di
-`web/public/`) sul server personale dell'autore, esposto pubblicamente via
-Cloudflare Tunnel su `eclisse-12-08-2026.tongatron.org`. Il repository Git **non**
-contiene credenziali di accesso al server: la documentazione di deploy con
-IP/SSH/password è mantenuta in un file locale separato, deliberatamente
-escluso dal controllo di versione (vedi `.gitignore`).
+Il sito è pubblicato da GitHub Pages tramite il workflow
+`.github/workflows/deploy-pages.yml`. A ogni push su `master`, GitHub carica
+direttamente `web/public/`, inclusi i tasselli dei dati. Non serve alcun
+server applicativo o procedura manuale di deploy.
 
-Per ripubblicare dopo una modifica al sito o ai dati:
+Il dominio `eclisse-12-08-2026.tongatron.org` è configurato come dominio
+personalizzato di GitHub Pages. Per pubblicare una modifica basta eseguire il
+normale flusso Git: commit e push su `master`.
 
-```bash
-rsync -az --delete web/public/ hp-ubuntu:/srv/apps/eclisse/public/
-ssh hp-ubuntu 'docker restart eclisse-site'
-```
-
-**Prima del deploy: alzare `ASSET_V` in `index.html`.** Cloudflare mette in
-cache i file statici ma non l'HTML. Senza versione nell'URL, dopo un deploy il
-browser riceve l'`index.html` nuovo insieme allo `score.png` vecchio ancora in
-cache — verificato in produzione: il CDN ha continuato a servire la heatmap
-regionale (3.056.892 B) per un'ora dopo che l'origine aveva già quella
-nazionale (5.222.331 B), e il risultato sarebbe stata la mappa sbagliata
-stirata sui nuovi angoli. `meta.json`, `score.png` e i tasselli sono richiesti
-con `?v=ASSET_V`, quindi basta cambiare quella costante perché il CDN veda
-URL nuovi. Verifica dopo il deploy:
-
-```bash
-curl -s -o /dev/null -w '%{http_code} %{size_download}B\n' https://eclisse-12-08-2026.tongatron.org/data/score.png?v=$(grep -o "ASSET_V = '[^']*'" web/public/index.html | cut -d"'" -f2)
-```
+**Quando cambiano gli asset dei dati, alzare `ASSET_V` in `index.html`.** I
+file vengono richiesti con `?v=ASSET_V`, così browser e CDN non riutilizzano
+una heatmap o tasselli della versione precedente.
