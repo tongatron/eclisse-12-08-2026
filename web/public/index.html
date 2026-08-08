@@ -32,12 +32,26 @@
   .hint{color:var(--dim);font-size:12px}
   .maplibregl-popup-content{background:#1b212b;color:var(--txt);border:1px solid var(--line);
     border-radius:8px;font:13px/1.4 system-ui;padding:10px 12px}
+  #q-comune{width:100%;background:#0e1116;border:1px solid var(--line);border-radius:6px;
+    color:var(--txt);padding:7px 9px;font:13px system-ui}
+  #q-comune:focus{outline:1px solid var(--acc)}
+  #q-results{margin-top:6px;max-height:180px;overflow-y:auto;border-radius:6px}
+  .q-item{padding:6px 8px;border-radius:5px;cursor:pointer;font-size:13px}
+  .q-item:hover{background:#232b36;color:var(--acc)}
+  .q-loading{color:var(--dim);font-size:12px;padding:4px 2px}
 </style>
 </head>
 <body>
 <div id="side">
   <h1>Eclissi del 12 agosto 2026</h1>
   <div class="sub">Dove il Sole eclissato resta sopra l'orizzonte reale — Piemonte e dintorni</div>
+
+  <div class="card">
+    <h2>Cerca comune</h2>
+    <input type="text" id="q-comune" placeholder="Es. Bardonecchia, Mondovì…" autocomplete="off">
+    <div id="q-results"></div>
+    <div class="hint" style="margin-top:6px">Ricerca via Nominatim/OpenStreetMap, limitata all'area coperta dal DEM.</div>
+  </div>
 
   <div class="card">
     <h2>Punto selezionato</h2>
@@ -164,6 +178,54 @@ Promise.all([
 
   map.on('click', e => inspect([e.lngLat.lng, e.lngLat.lat]));
 });
+
+// Area coperta dal DEM (pipeline/config.py: DEM_LON_MIN..MAX, DEM_LAT_MIN..MAX),
+// usata come viewbox per scartare comuni fuori dalla zona calcolata.
+const DEM_VIEWBOX = '3,47,9,43'; // lon_min,lat_max,lon_max,lat_min
+let qTimer = null, qAbort = null;
+
+$('#q-comune').oninput = e => {
+  clearTimeout(qTimer);
+  const val = e.target.value.trim();
+  if (val.length < 2) { $('#q-results').innerHTML = ''; return; }
+  qTimer = setTimeout(() => searchComune(val), 400);
+};
+
+async function searchComune(q){
+  if (qAbort) qAbort.abort();
+  qAbort = new AbortController();
+  $('#q-results').innerHTML = '<div class="q-loading">Cerco…</div>';
+  const url = 'https://nominatim.openstreetmap.org/search?format=json'
+    + '&q=' + encodeURIComponent(q + ', Italia')
+    + '&viewbox=' + DEM_VIEWBOX + '&bounded=1&countrycodes=it&limit=6';
+  try {
+    const res = await fetch(url, { signal: qAbort.signal, headers: { 'Accept-Language': 'it' } });
+    renderResults(await res.json());
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      $('#q-results').innerHTML = '<div class="q-loading">Ricerca non disponibile</div>';
+    }
+  }
+}
+
+function renderResults(items){
+  const box = $('#q-results');
+  box.innerHTML = '';
+  if (!items.length) { box.innerHTML = '<div class="q-loading">Nessun risultato</div>'; return; }
+  items.forEach(it => {
+    const div = document.createElement('div');
+    div.className = 'q-item';
+    div.textContent = it.display_name.split(',').slice(0, 3).join(',');
+    div.onclick = () => {
+      const c = [+it.lon, +it.lat];
+      map.flyTo({ center: c, zoom: 12 });
+      inspect(c);
+      box.innerHTML = '';
+      $('#q-comune').value = it.display_name.split(',')[0];
+    };
+    box.appendChild(div);
+  });
+}
 
 function loadImageData(url){
   return new Promise((res,rej)=>{

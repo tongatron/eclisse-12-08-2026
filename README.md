@@ -306,6 +306,15 @@ logica di lettura pixel gira nel browser.
 - **Resize**: il canvas MapLibre viene ridimensionato esplicitamente
   (`map.resize()`) su `ResizeObserver` del contenitore, perché la creazione
   della mappa può avvenire prima che il layout CSS sia definitivo.
+- **Ricerca comune**: campo di testo in cima al pannello, geocoding
+  client-side via API `search` di **Nominatim/OpenStreetMap**
+  (`nominatim.openstreetmap.org`), con `viewbox` limitato ai bound del DEM
+  (`3,47,9,43`, `bounded=1`) e `countrycodes=it` per scartare risultati fuori
+  area. Input con debounce di 400 ms e `AbortController` per annullare le
+  richieste stale mentre l'utente digita. Alla selezione di un risultato:
+  `map.flyTo()` sul punto e chiamata a `inspect()` come per un click sulla
+  mappa. Nessuna chiave API richiesta; rispetta la usage policy di Nominatim
+  per volumi bassi (uso personale, non un servizio ad alto traffico).
 
 ---
 
@@ -460,6 +469,7 @@ dopo il fix, che ha spostato l'osservatore sulla cella più alta del blocco
 | Rete stradale | OpenStreetMap, estratto Geofabrik nord-ovest | ODbL — attribuzione richiesta (presente nel footer della mappa) |
 | Efemeridi | `astronomy-engine` (Don Cross, MIT) | MIT |
 | Tile di base | OpenStreetMap standard tile server | uso per sviluppo; per produzione ad alto traffico servirebbe un provider dedicato (es. MapTiler, Stadia) per rispettare la tile usage policy di OSM |
+| Geocoding (ricerca comune) | Nominatim, OpenStreetMap | uso per sviluppo/basso volume; per produzione ad alto traffico servirebbe un'istanza propria o un provider a pagamento, per rispettare la usage policy di Nominatim |
 | Meteo (previsto) | Open-Meteo | CC BY 4.0, nessuna API key |
 
 ---
