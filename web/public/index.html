@@ -276,10 +276,8 @@ function ramp(v){
   }
 })();
 
-const DEFAULT_LOCATION = [7.72124, 44.95225];
-
 const map = new maplibregl.Map({
-  container:'map', center:DEFAULT_LOCATION, zoom:12, maxZoom:14,
+  container:'map', center:[12.5,42.0], zoom:5, maxZoom:14,
   style:{ version:8,
     sources:{ osm:{ type:'raster', tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
       tileSize:256, attribution:'© OpenStreetMap · DEM Copernicus GLO-90' } },
@@ -315,15 +313,12 @@ const dataReady = Promise.all([
 
   map.on('click', e => inspect([e.lngLat.lng, e.lngLat.lat]));
 
-  // Link condivisibile: se l'URL contiene ?lat=&lon= riapri quel punto;
-  // altrimenti mostra Torino come posizione iniziale.
+  // Link condivisibile: se l'URL contiene ?lat=&lon= riapri quel punto.
   const qs = new URLSearchParams(location.search);
   const slat = parseFloat(qs.get('lat')), slon = parseFloat(qs.get('lon'));
   if(Number.isFinite(slat) && Number.isFinite(slon)){
     map.flyTo({ center: [slon, slat], zoom: 12 });
     inspect([slon, slat]);
-  } else {
-    inspect(DEFAULT_LOCATION, {updateUrl:false});
   }
 });
 
