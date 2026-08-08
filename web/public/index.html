@@ -27,6 +27,7 @@
 <meta name="twitter:title" content="Punto Eclissi — 12 agosto 2026">
 <meta name="twitter:description" content="Mappa interattiva della visibilità dell'eclissi solare in Italia.">
 <meta name="twitter:image" content="https://eclisse.tongatron.org/eclisse.png">
+<script defer src="https://analytics.tongatron.org/script.js" data-website-id="b42586e5-5854-4020-b493-ce3121f579ca"></script>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
   :root{--bg:#0e1116;--panel:#161b23;--line:#2a323d;--txt:#e6edf3;--dim:#8b98a8;--acc:#4ade80}
@@ -80,6 +81,11 @@
   footer details{margin-top:8px}
   footer summary{cursor:pointer;color:var(--txt)}
   footer details p{margin:7px 0 0}
+  .details-options{margin-bottom:12px}
+  .details-options summary{cursor:pointer;background:#1b212b;border:1px solid var(--line);
+    border-radius:8px;padding:10px 11px;color:var(--txt);font-size:12px;font-weight:600}
+  .details-options[open] summary{margin-bottom:10px}
+  .details-options .card:last-child{margin-bottom:0}
 
   /* Maniglia mobile: la regola sta fuori dal media query perche' il pulsante
      esiste sempre nel DOM (nascosto da desktop) e il suo listener si registra
@@ -122,7 +128,7 @@
 <body>
 <div id="side">
   <h1>Eclissi del 12 agosto 2026</h1>
-  <div class="sub">Dove il Sole eclissato resta sopra l'orizzonte reale — tutta Italia</div>
+  <div class="sub">Trova i migliori punti per vedere l’eclisse del 12 agosto in Italia</div>
 
   <div class="card">
     <h2>Cerca comune</h2>
@@ -168,38 +174,42 @@
     <div class="hint" style="margin-top:8px" id="sim-summary">–</div>
   </div>
 
-  <div class="card">
-    <h2>Scala</h2>
-    <div class="legend" id="legend"></div>
-    <div class="lab"><span>0%</span><span>50%</span><span>75%</span><span>95%</span></div>
-    <div class="hint" style="margin-top:8px">Il massimo italiano è in <b>Sardegna nord-occidentale</b>,
-      ~<b>98%</b> fra Stintino e Alghero: la fascia di totalità finisce al tramonto poco al largo, a
-      ovest dell'isola. Poi ~94% nelle Alpi occidentali, ~81% al Centro, ~20% fra Calabria, Sicilia
-      e Salento, dove il Sole tramonta molto prima del culmine.
-      <br><br>
-      Il rosso non è poco oscuramento in sé: è il Sole già scomparso, sotto l'orizzonte o dietro
-      un rilievo. In Sardegna il Sole è a <i>0,1° di altezza</i> nel momento migliore, quindi
-      mezzo grado di collina costa dieci punti: conviene un orizzonte marino libero.</div>
-  </div>
+  <details class="details-options">
+    <summary>Dettagli e opzioni</summary>
 
-  <div class="card">
-    <h2>Opacità layer eclissi</h2>
-    <input type="range" id="op" min="0" max="100" value="75">
-  </div>
-
-  <div class="card">
-    <h2>Come è calcolato</h2>
-    <div class="hint">
-      Efemeridi Sole/Luna (astronomy-engine), oscuramento come frazione di area del disco.
-      Orizzonte da DEM Copernicus GLO-90 a 90 m con raycast su 26 azimut fino a 150 km,
-      curvatura terrestre e rifrazione (R = 7/6 R⊕). Un punto vale il massimo oscuramento
-      raggiunto <i>mentre</i> il Sole è ancora sopra il proprio skyline. Griglia di analisi
-      180 m su tutto il territorio italiano.
-      <br><br>
-      La mappa colorata è una vista d'insieme a 600 m; i valori esatti che compaiono cliccando
-      arrivano da tasselli a 250 m scaricati solo per la zona che stai guardando.
+    <div class="card">
+      <h2>Scala</h2>
+      <div class="legend" id="legend"></div>
+      <div class="lab"><span>0%</span><span>50%</span><span>75%</span><span>95%</span></div>
+      <div class="hint" style="margin-top:8px">Il massimo italiano è in <b>Sardegna nord-occidentale</b>,
+        ~<b>98%</b> fra Stintino e Alghero: la fascia di totalità finisce al tramonto poco al largo, a
+        ovest dell'isola. Poi ~94% nelle Alpi occidentali, ~81% al Centro, ~20% fra Calabria, Sicilia
+        e Salento, dove il Sole tramonta molto prima del culmine.
+        <br><br>
+        Il rosso non è poco oscuramento in sé: è il Sole già scomparso, sotto l'orizzonte o dietro
+        un rilievo. In Sardegna il Sole è a <i>0,1° di altezza</i> nel momento migliore, quindi
+        mezzo grado di collina costa dieci punti: conviene un orizzonte marino libero.</div>
     </div>
-  </div>
+
+    <div class="card">
+      <h2>Opacità layer eclissi</h2>
+      <input type="range" id="op" min="0" max="100" value="75">
+    </div>
+
+    <div class="card">
+      <h2>Come è calcolato</h2>
+      <div class="hint">
+        Efemeridi Sole/Luna (astronomy-engine), oscuramento come frazione di area del disco.
+        Orizzonte da DEM Copernicus GLO-90 a 90 m con raycast su 26 azimut fino a 150 km,
+        curvatura terrestre e rifrazione (R = 7/6 R⊕). Un punto vale il massimo oscuramento
+        raggiunto <i>mentre</i> il Sole è ancora sopra il proprio skyline. Griglia di analisi
+        180 m su tutto il territorio italiano.
+        <br><br>
+        La mappa colorata è una vista d'insieme a 600 m; i valori esatti che compaiono cliccando
+        arrivano da tasselli a 250 m scaricati solo per la zona che stai guardando.
+      </div>
+    </div>
+  </details>
 
   <footer>
     <p>Un progetto di <a href="https://tongatron.org" target="_blank" rel="noopener noreferrer">tongatron.org</a></p>
