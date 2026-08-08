@@ -13,6 +13,11 @@ geometria dell'eclissi sia l'orizzonte reale: montagne, colline e tramonto.
 
 ![Anteprima della mappa dell'eclissi solare del 12 agosto 2026 in Italia](docs/images/anteprima-mappa-eclissi.png)
 
+*Dettaglio su Torino: il pannello mostra copertura visibile, orari locali,
+quota, coordinate e la simulazione dell'eclissi nel punto selezionato.*
+
+![Dettaglio della mappa su Torino con pannello dei dati dell'eclissi](docs/images/dettaglio-torino-pannello-eclissi.png)
+
 ## In breve
 
 - Il punto migliore sulla terraferma è la costa nord-occidentale della
