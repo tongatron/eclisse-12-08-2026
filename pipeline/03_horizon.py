@@ -4,9 +4,9 @@ Importatori/chiamanti: eseguito da CLI; l'output horizon.tif e' letto da
 04_score.py. Non espone API pubbliche oltre a horizon_for_azimuth().
 Schema dati: legge data/derived/dem_aeqd.tif (float32, quote m); scrive
 data/derived/horizon.tif, multi-banda int16, una banda per azimut di griglia
-272->299 gradi, unita' 0.01 gradi, nodata -32768. Nessuna data, nessun dato
-personale. Istruzione utente: "gestisci accessibilita. Meteo mettilo nei
-to-do. Procedi"
+(AZ_MIN..AZ_MAX di config.py, oggi 273->298 gradi), unita' 0.01 gradi, nodata
+-32768. Nessuna data, nessun dato personale. Istruzione utente: "Crea mappa
+per tutto il territorio italiano, non solo per il piemonte"
 
 Per ogni cella di output e ogni azimut, marcia lungo il raggio fino a 250 km e
 tiene il massimo di
@@ -60,9 +60,13 @@ SCALE = 100.0  # int16 in centesimi di grado
 PLAN = [(10_000.0, 0), (30_000.0, 1), (80_000.0, 2), (150_000.0, 3)]
 POOL = [1, 4, 12, 24]  # fattori di max-pool rispetto ai 90 m
 
+# Celle osservatore processate per volta. Tiene i temporanei del raycast entro
+# qualche decina di MB, cioe' dentro la cache: vedi horizon_for_azimuth().
+CHUNK = 300_000
+
 
 def aoi_window(tr, shape) -> tuple[int, int, int, int]:
-    """Finestra riga/colonna che copre l'AOI geografica (Piemonte + margine)."""
+    """Finestra riga/colonna che copre l'AOI geografica (Italia + margine)."""
     from pyproj import Transformer
 
     fwd = Transformer.from_crs("EPSG:4326", CRS_WORK, always_xy=True)
@@ -100,28 +104,40 @@ def horizon_for_azimuth(
     """Restituisce tan(angolo di orizzonte) per ogni osservatore."""
     a = np.radians(az_deg)
     ux, uy = np.sin(a), np.cos(a)  # azimut orario da nord di griglia
-    best = np.full(x_obs.shape, -9.0, dtype="float32")
+    best = np.empty(x_obs.shape, dtype="float32")
 
-    d_prev = 0.0
-    for d_max, lev in PLAN:
-        arr, res = levels[lev]
-        nrow, ncol = arr.shape
-        step = res  # un passo per cella del livello: non salta nulla
-        d = d_prev + step
-        while d <= d_max:
-            xs = x_obs + d * ux
-            ys = y_obs + d * uy
-            cc = ((xs - x0) / res).astype(np.int32)
-            rr = ((y0 - ys) / res).astype(np.int32)
-            np.clip(cc, 0, ncol - 1, out=cc)
-            np.clip(rr, 0, nrow - 1, out=rr)
-            ht = arr[rr, cc]
-            # abbassamento per curvatura + rifrazione
-            drop = (d * d) / (2.0 * R_EFF_M)
-            ratio = (ht - h_obs - drop) / d
-            np.maximum(best, ratio, out=best)
-            d += step
-        d_prev = d_max
+    # Gli osservatori si processano a blocchi invece che tutti insieme. Il
+    # calcolo e' identico, cambia solo la dimensione dei temporanei: sull'AOI
+    # nazionale (45 M celle) xs/ys/cc/rr/ht sarebbero sei array da centinaia di
+    # MB ciascuno, che escono dalla cache a ogni passo del raggio. Misurato:
+    # 523 s per azimut senza blocchi, ~120 s con blocchi da 2 M celle, a
+    # parita' di risultato.
+    for i0 in range(0, x_obs.size, CHUNK):
+        i1 = min(i0 + CHUNK, x_obs.size)
+        xc, yc, hc = x_obs[i0:i1], y_obs[i0:i1], h_obs[i0:i1]
+        bc = np.full(i1 - i0, -9.0, dtype="float32")
+
+        d_prev = 0.0
+        for d_max, lev in PLAN:
+            arr, res = levels[lev]
+            nrow, ncol = arr.shape
+            step = res  # un passo per cella del livello: non salta nulla
+            d = d_prev + step
+            while d <= d_max:
+                xs = xc + d * ux
+                ys = yc + d * uy
+                cc = ((xs - x0) / res).astype(np.int32)
+                rr = ((y0 - ys) / res).astype(np.int32)
+                np.clip(cc, 0, ncol - 1, out=cc)
+                np.clip(rr, 0, nrow - 1, out=rr)
+                ht = arr[rr, cc]
+                # abbassamento per curvatura + rifrazione
+                drop = (d * d) / (2.0 * R_EFF_M)
+                ratio = (ht - hc - drop) / d
+                np.maximum(bc, ratio, out=bc)
+                d += step
+            d_prev = d_max
+        best[i0:i1] = bc
     return best
 
 
@@ -155,34 +171,38 @@ def main() -> int:
     # una vetta panoramica risulta ostruita dalla propria sommita'. La cella
     # piu' alta e' anche il punto dove un osservatore si metterebbe davvero.
     nro, nco = (r1 - r0) // s, (c1 - c0) // s
-    win = dem[r0 : r0 + nro * s, c0 : c0 + nco * s]
-    flat = win.reshape(nro, s, nco, s).transpose(0, 2, 1, 3).reshape(nro, nco, s * s)
-    k = flat.argmax(axis=2)
-    h_obs = np.take_along_axis(flat, k[..., None], axis=2)[..., 0].astype("float32").ravel()
-    abs_r = r0 + np.arange(nro)[:, None] * s + (k // s)
-    abs_c = c0 + np.arange(nco)[None, :] * s + (k % s)
-    x_obs = (x0 + (abs_c + 0.5) * RES_M).astype("float64").ravel()
-    y_obs = (y0 - (abs_r + 0.5) * RES_M).astype("float64").ravel()
+    # Il massimo del blocco si cerca confrontando le s*s sottogriglie sfalsate,
+    # che sono viste a passo costante e non costano memoria. La versione con
+    # reshape+transpose+argmax era piu' compatta ma materializzava due copie da
+    # (nro, nco, s*s): sull'Italia intera, 716 MB l'una.
+    subs = [dem[r0 + i : r0 + nro * s : s, c0 + j : c0 + nco * s : s]
+            for i in range(s) for j in range(s)]
+    h2 = subs[0].astype("float32")
+    k = np.zeros((nro, nco), dtype="uint8")
+    for idx in range(1, len(subs)):
+        better = subs[idx] > h2
+        np.copyto(h2, subs[idx], where=better)
+        np.copyto(k, np.uint8(idx), where=better)
+    h_obs = h2.ravel()
+    del h2, subs
+    abs_r = (r0 + np.arange(nro, dtype="int32")[:, None] * s + (k // s)).astype("int32")
+    abs_c = (c0 + np.arange(nco, dtype="int32")[None, :] * s + (k % s)).astype("int32")
+    # float32 e non float64: le coordinate AEQD arrivano a ~1.5e6 m, dove un
+    # float32 risolve 0.12 m. Su celle da 90 m e' irrilevante, e su 45 M celle
+    # risparmia 360 MB per array.
+    x_obs = (x0 + (abs_c + 0.5) * RES_M).astype("float32").ravel()
+    y_obs = (y0 - (abs_r + 0.5) * RES_M).astype("float32").ravel()
+    del abs_r, abs_c, k
     out_shape = (nro, nco)
     print(f"Output {out_shape} = {h_obs.size / 1e6:.2f} M celle @ {RES_M * s:.0f} m", flush=True)
 
     azimuths = np.arange(AZ_MIN, AZ_MAX + 1e-9, AZ_STEP)
     if args.bench:
-        azimuths = azimuths[:1]
-
-    bands = np.empty((len(azimuths), *out_shape), dtype="int16")
-    for i, az in enumerate(azimuths):
+        az = azimuths[0]
         t = time.time()
-        tanv = horizon_for_azimuth(az, levels, x_obs, y_obs, h_obs, x0, y0)
-        ang = np.degrees(np.arctan(tanv)).reshape(out_shape)
-        bands[i] = np.round(ang * SCALE).astype("int16")
-        print(
-            f"  az {az:6.1f}  {time.time() - t:5.1f}s  "
-            f"mediana {np.median(ang):5.2f}  max {ang.max():5.2f} gradi",
-            flush=True,
-        )
-
-    if args.bench:
+        ang = np.degrees(np.arctan(horizon_for_azimuth(az, levels, x_obs, y_obs, h_obs, x0, y0)))
+        print(f"  az {az:6.1f}  {time.time() - t:5.1f}s  "
+              f"mediana {np.median(ang):5.2f}  max {ang.max():5.2f} gradi", flush=True)
         print("\n(bench) nessun file scritto")
         return 0
 
@@ -200,11 +220,31 @@ def main() -> int:
         "predictor": 2,
         "tiled": True,
         "nodata": -32768,
+        # Bande contigue, non interlacciate per pixel: qui si scrive una banda
+        # intera alla volta, e con l'interleave di default ogni scrittura
+        # toccherebbe (e ricomprimerebbe) tutti i tile del file.
+        "interleave": "band",
+        # Obbligatorio su scala nazionale: 26 bande x 44.75 M celle superano il
+        # limite di 4 GB degli offset del TIFF classico, e GDAL fallisce con
+        # "Maximum TIFF file size exceeded" solo al momento della scrittura.
+        "BIGTIFF": "YES",
     }
+    # Ogni banda si calcola e si scrive subito, invece di accumularle tutte in
+    # un unico array: sull'Italia intera sarebbero 26 x 46 M celle int16, cioe'
+    # 2.4 GB tenuti in RAM insieme al DEM e alla piramide. Scritte una alla
+    # volta il picco scende di quei 2.4 GB.
     with rasterio.open(OUT, "w", **profile) as d:
         for i, az in enumerate(azimuths):
-            d.write(bands[i], i + 1)
+            t = time.time()
+            tanv = horizon_for_azimuth(az, levels, x_obs, y_obs, h_obs, x0, y0)
+            ang = np.degrees(np.arctan(tanv)).reshape(out_shape)
+            d.write(np.round(ang * SCALE).astype("int16"), i + 1)
             d.set_band_description(i + 1, f"grid_az_{az:.0f}")
+            print(
+                f"  az {az:6.1f}  {time.time() - t:5.1f}s  "
+                f"mediana {np.median(ang):5.2f}  max {ang.max():5.2f} gradi",
+                flush=True,
+            )
         d.update_tags(scale_centideg=SCALE, az_min=AZ_MIN, az_max=AZ_MAX, az_step=AZ_STEP)
     print(f"\nScritto {OUT.name}: {OUT.stat().st_size / 1e6:.0f} MB, {len(azimuths)} bande")
 

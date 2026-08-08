@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Eclissi 12 agosto 2026 — dove guardarla in Piemonte</title>
+<title>Eclissi 12 agosto 2026 — dove guardarla in Italia</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
   :root{--bg:#0e1116;--panel:#161b23;--line:#2a323d;--txt:#e6edf3;--dim:#8b98a8;--acc:#4ade80}
@@ -39,18 +39,65 @@
   .q-item{padding:6px 8px;border-radius:5px;cursor:pointer;font-size:13px}
   .q-item:hover{background:#232b36;color:var(--acc)}
   .q-loading{color:var(--dim);font-size:12px;padding:4px 2px}
+  .gmaps-link{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;
+    color:var(--acc);text-decoration:none}
+  .gmaps-link:hover{text-decoration:underline}
+  #sim-chart{width:100%;height:120px;display:block;cursor:crosshair;touch-action:none}
+  #sim-disc{flex:none;background:#0b0f15;border-radius:50%;border:1px solid var(--line)}
+  #sim-status{margin-top:2px}
+  .btn-play{background:#1f2733;border:1px solid var(--line);color:var(--txt);border-radius:6px;
+    padding:5px 12px;font-size:12px;cursor:pointer}
+  .btn-play:hover{border-color:var(--acc);color:var(--acc)}
+  .btn-play:disabled{opacity:.4;cursor:default;border-color:var(--line);color:var(--txt)}
+
+  /* Maniglia mobile: la regola sta fuori dal media query perche' il pulsante
+     esiste sempre nel DOM (nascosto da desktop) e il suo listener si registra
+     una volta sola, senza dipendere dal viewport corrente. */
+  #panel-toggle{display:none}
+
+  @media (max-width: 768px){
+    /* Niente scroll di documento: scorre il pannello, non la pagina. Con il
+       body scrollabile il trascinamento sulla mappa muoveva la pagina. */
+    html,body{height:100%;overflow:hidden}
+    /* dvh e non vh: su iOS la barra degli indirizzi che si ritrae cambia vh e
+       lascerebbe la mappa tagliata sotto il bordo dello schermo. */
+    :root{--side-h:46dvh}
+    #side{width:100%;height:var(--side-h);bottom:auto;
+      border-right:none;border-bottom:1px solid var(--line);padding-bottom:26px}
+    #map{inset:var(--side-h) 0 0 0}
+
+    #panel-toggle{display:flex;align-items:center;gap:6px;position:fixed;z-index:20;
+      left:50%;transform:translateX(-50%);top:calc(var(--side-h) - 15px);
+      background:var(--panel);border:1px solid var(--line);border-radius:999px;
+      color:var(--txt);font:12px/1 system-ui;padding:8px 15px;cursor:pointer;
+      box-shadow:0 2px 10px rgba(0,0,0,.45)}
+    #panel-toggle:active{background:#232b36}
+
+    body.map-full #side{display:none}
+    body.map-full #map{inset:0}
+    body.map-full #panel-toggle{top:max(10px,env(safe-area-inset-top))}
+    /* A pannello chiuso i controlli di MapLibre finirebbero sotto la maniglia
+       centrata in alto: vanno spostati piu' in basso. */
+    body.map-full .maplibregl-ctrl-top-right{margin-top:40px}
+  }
+
+  /* Telefono in orizzontale: 46dvh di pannello lascerebbero una striscia di
+     mappa inutilizzabile, quindi il pannello parte gia' chiuso (vedi JS). */
+  @media (max-width: 768px) and (max-height: 460px){
+    :root{--side-h:64dvh}
+  }
 </style>
 </head>
 <body>
 <div id="side">
   <h1>Eclissi del 12 agosto 2026</h1>
-  <div class="sub">Dove il Sole eclissato resta sopra l'orizzonte reale — Piemonte e dintorni</div>
+  <div class="sub">Dove il Sole eclissato resta sopra l'orizzonte reale — tutta Italia</div>
 
   <div class="card">
     <h2>Cerca comune</h2>
-    <input type="text" id="q-comune" placeholder="Es. Bardonecchia, Mondovì…" autocomplete="off">
+    <input type="text" id="q-comune" placeholder="Es. Bardonecchia, Matera, Erice…" autocomplete="off">
     <div id="q-results"></div>
-    <div class="hint" style="margin-top:6px">Ricerca via Nominatim/OpenStreetMap, limitata all'area coperta dal DEM.</div>
+    <div class="hint" style="margin-top:6px">Ricerca via Nominatim/OpenStreetMap, su tutto il territorio italiano.</div>
   </div>
 
   <div class="card">
@@ -59,50 +106,87 @@
     <div id="sel" style="display:none">
       <div class="big"><span id="v-obsc">–</span>%</div>
       <div class="pill" style="margin-bottom:8px">oscuramento massimo visibile</div>
+      <div class="kv"><span>Primo contatto locale</span><b id="v-first">–</b></div>
       <div class="kv"><span>Istante migliore</span><b id="v-time">–</b></div>
+      <div class="kv"><span>Ultimo contatto locale</span><b id="v-last">–</b></div>
       <div class="kv"><span>Ostacolo all'orizzonte</span><b id="v-hor">–</b></div>
-      <div class="kv"><span>Strada più vicina</span><b id="v-road">–</b></div>
+      <div class="kv"><span>Quota</span><b id="v-elev">–</b></div>
       <div class="kv"><span>Coordinate</span><b id="v-ll">–</b></div>
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:8px">
+        <a id="v-gmaps" class="gmaps-link" href="#" target="_blank" rel="noopener noreferrer">Apri in Google Maps ↗</a>
+        <button id="v-share" type="button" class="gmaps-link" style="background:none;border:none;padding:0;font:inherit;cursor:pointer">🔗 Copia link</button>
+      </div>
+      <div class="pill" id="v-share-msg" style="min-height:14px;margin-top:2px"></div>
     </div>
+  </div>
+
+  <div class="card" id="sim-card" style="display:none">
+    <h2>Simulazione dell'eclissi</h2>
+    <svg id="sim-chart" viewBox="0 0 300 120" preserveAspectRatio="none"></svg>
+    <div style="display:flex;justify-content:flex-end;margin-top:8px">
+      <button id="sim-play" type="button" class="btn-play">▶ Riproduci</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+      <svg id="sim-disc" width="58" height="58" viewBox="-29 -29 58 58"></svg>
+      <div style="flex:1;min-width:0">
+        <div class="kv"><span>Ora</span><b id="sim-t">–</b></div>
+        <div class="kv"><span>Oscuramento in quel momento</span><b id="sim-o">–</b></div>
+        <div class="pill" id="sim-status">–</div>
+      </div>
+    </div>
+    <div class="hint" style="margin-top:8px" id="sim-summary">–</div>
   </div>
 
   <div class="card">
     <h2>Scala</h2>
     <div class="legend" id="legend"></div>
     <div class="lab"><span>0%</span><span>50%</span><span>75%</span><span>95%</span></div>
-    <div class="hint" style="margin-top:8px">Il massimo teorico in Piemonte è ~94%. Il rosso non è
-      poco oscuramento: è il Sole già scomparso dietro i monti.</div>
+    <div class="hint" style="margin-top:8px">Il massimo italiano è in <b>Sardegna nord-occidentale</b>,
+      ~<b>98%</b> fra Stintino e Alghero: la fascia di totalità finisce al tramonto poco al largo, a
+      ovest dell'isola. Poi ~94% nelle Alpi occidentali, ~81% al Centro, ~20% fra Calabria, Sicilia
+      e Salento, dove il Sole tramonta molto prima del culmine.
+      <br><br>
+      Il rosso non è poco oscuramento in sé: è il Sole già scomparso, sotto l'orizzonte o dietro
+      un rilievo. In Sardegna il Sole è a <i>0,1° di altezza</i> nel momento migliore, quindi
+      mezzo grado di collina costa dieci punti: conviene un orizzonte marino libero.</div>
   </div>
 
   <div class="card">
-    <h2>Livelli</h2>
-    <label><input type="checkbox" id="t-score" checked> Visibilità dell'eclissi</label>
-    <label><input type="checkbox" id="t-access"> Distanza dalle strade</label>
-    <label><input type="checkbox" id="t-sites" checked> Migliori 20 postazioni</label>
-    <div class="pill" style="margin-top:8px">Opacità</div>
+    <h2>Opacità layer eclissi</h2>
     <input type="range" id="op" min="0" max="100" value="75">
-  </div>
-
-  <div class="card">
-    <h2>Migliori postazioni raggiungibili</h2>
-    <ol id="list"></ol>
   </div>
 
   <div class="card">
     <h2>Come è calcolato</h2>
     <div class="hint">
       Efemeridi Sole/Luna (astronomy-engine), oscuramento come frazione di area del disco.
-      Orizzonte da DEM Copernicus GLO-90 a 90 m con raycast su 28 azimut, curvatura terrestre
-      e rifrazione (R = 7/6 R⊕). Un punto vale il massimo oscuramento raggiunto
-      <i>mentre</i> il Sole è ancora sopra il proprio skyline. Griglia 180 m.
+      Orizzonte da DEM Copernicus GLO-90 a 90 m con raycast su 26 azimut fino a 150 km,
+      curvatura terrestre e rifrazione (R = 7/6 R⊕). Un punto vale il massimo oscuramento
+      raggiunto <i>mentre</i> il Sole è ancora sopra il proprio skyline. Griglia di analisi
+      180 m su tutto il territorio italiano.
+      <br><br>
+      La mappa colorata è una vista d'insieme a 600 m; i valori esatti che compaiono cliccando
+      arrivano da tasselli a 250 m scaricati solo per la zona che stai guardando.
     </div>
   </div>
 </div>
 <div id="map"></div>
+<button id="panel-toggle" type="button" aria-controls="side" aria-expanded="true">
+  <span id="panel-toggle-icon" aria-hidden="true">▲</span>
+  <span id="panel-toggle-text">Nascondi pannello</span>
+</button>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/astronomy-engine@2.1.19/astronomy.browser.js"></script>
 <script>
 const $ = s => document.querySelector(s);
+
+// Versione degli asset dati. Cloudflare mette in cache i file statici ma non
+// l'HTML: dopo un deploy il browser riceveva index.html aggiornato insieme a
+// score.png vecchio di un'ora, cioe' la heatmap sbagliata stirata sui nuovi
+// angoli. Da alzare a ogni rigenerazione della pipeline.
+const ASSET_V = '20260808b';
+const v = url => url + (url.includes('?') ? '&' : '?') + 'v=' + ASSET_V;
 
 // stessa rampa di 06_export.py
 const STOPS = [[0,[140,22,22]],[50,[200,90,30]],[75,[225,190,60]],[88,[120,190,70]],[94,[30,200,120]]];
@@ -122,7 +206,7 @@ function ramp(v){
 })();
 
 const map = new maplibregl.Map({
-  container:'map', center:[7.9,45.0], zoom:7.2, maxZoom:14,
+  container:'map', center:[12.5,42.0], zoom:5, maxZoom:14,
   style:{ version:8,
     sources:{ osm:{ type:'raster', tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
       tileSize:256, attribution:'© OpenStreetMap · DEM Copernicus GLO-90' } },
@@ -130,8 +214,9 @@ const map = new maplibregl.Map({
       paint:{'raster-saturation':-0.7,'raster-brightness-max':0.85}}]
   }
 });
+map.addControl(new maplibregl.NavigationControl({showCompass:false}), 'top-right');
 
-let META=null, DATA=null, ACC=null;
+let META=null, TILES=null;
 
 // addSource fallisce se lo style non e' ancora caricato: va atteso come gli altri.
 const mapReady = new Promise(res => map.on('load', res));
@@ -142,46 +227,34 @@ mapReady.then(() => map.resize());
 window.addEventListener('resize', () => map.resize());
 new ResizeObserver(() => map.resize()).observe(document.getElementById('map'));
 
+// All'avvio si scarica solo la vista d'insieme: i tasselli con i valori
+// esatti arrivano al primo click, uno per volta (vedi getTile).
 Promise.all([
-  fetch('data/meta.json').then(r=>r.json()),
-  fetch('data/sites.geojson').then(r=>r.json()),
-  loadImageData('data/data.png'),
-  loadImageData('data/access.png'),
+  fetch(v('data/meta.json')).then(r=>r.json()),
   mapReady
-]).then(([meta, sites, img, acc])=>{
-  META=meta; DATA=img; ACC=acc;
+]).then(([meta])=>{
+  META=meta; TILES=meta.tiles;
   const C = meta.corners_lonlat;
 
-  map.addSource('score', {type:'image', url:'data/score.png', coordinates:C});
+  map.addSource('score', {type:'image', url:v('data/score.png'), coordinates:C});
   map.addLayer({id:'score', type:'raster', source:'score',
     paint:{'raster-opacity':0.75,'raster-resampling':'nearest'}});
 
-  map.addSource('access', {type:'image', url:'data/access.png', coordinates:C});
-  map.addLayer({id:'access', type:'raster', source:'access', paint:{'raster-opacity':0}});
-
-  map.addSource('sites', {type:'geojson', data:sites});
-  map.addLayer({id:'sites-halo', type:'circle', source:'sites',
-    paint:{'circle-radius':9,'circle-color':'#0e1116','circle-opacity':0.85}});
-  map.addLayer({id:'sites', type:'circle', source:'sites',
-    paint:{'circle-radius':5,'circle-color':'#4ade80',
-      'circle-stroke-width':1.5,'circle-stroke-color':'#0b3'}});
-
-  const L = $('#list');
-  sites.features.forEach(f=>{
-    const p=f.properties, c=f.geometry.coordinates, li=document.createElement('li');
-    li.innerHTML = '<b>'+p.oscuramento_pct+'%</b> · '+p.quota_m+' m · '+p.ora_massimo+
-      '<div class="pill">'+c[1].toFixed(4)+', '+c[0].toFixed(4)+
-      ' · strada a '+p.dist_strada_m+' m</div>';
-    li.onclick = ()=>{ map.flyTo({center:c, zoom:12}); inspect(c); };
-    L.appendChild(li);
-  });
-
   map.on('click', e => inspect([e.lngLat.lng, e.lngLat.lat]));
+
+  // Link condivisibile: se l'URL contiene ?lat=&lon= riapri quel punto.
+  const qs = new URLSearchParams(location.search);
+  const slat = parseFloat(qs.get('lat')), slon = parseFloat(qs.get('lon'));
+  if(Number.isFinite(slat) && Number.isFinite(slon)){
+    map.flyTo({ center: [slon, slat], zoom: 12 });
+    inspect([slon, slat]);
+  }
 });
 
-// Area coperta dal DEM (pipeline/config.py: DEM_LON_MIN..MAX, DEM_LAT_MIN..MAX),
-// usata come viewbox per scartare comuni fuori dalla zona calcolata.
-const DEM_VIEWBOX = '3,47,9,43'; // lon_min,lat_max,lon_max,lat_min
+// Area di output della pipeline (pipeline/config.py: AOI_LON_MIN..MAX,
+// AOI_LAT_MIN..MAX), usata come viewbox per scartare comuni fuori dalla zona
+// calcolata.
+const DEM_VIEWBOX = '6.55,47.15,18.6,35.4'; // lon_min,lat_max,lon_max,lat_min
 let qTimer = null, qAbort = null;
 
 $('#q-comune').oninput = e => {
@@ -243,62 +316,414 @@ function lonLatTo3857(lon,lat){
   return [R*lon*Math.PI/180, R*Math.log(Math.tan(Math.PI/4+lat*Math.PI/360))];
 }
 
-function pixelIndex(img, ll){
+// --- Tasselli dati ---------------------------------------------------------
+// I valori esatti stanno in tasselli da 1024 px a 250 m (vedi
+// pipeline/06_export.py). Un unico raster nazionale a questa risoluzione
+// sarebbe 70 MB di PNG e 234 MB di ImageData: qui se ne scarica uno solo,
+// quello sotto al punto cliccato, e resta in cache per i click successivi.
+const tileCache = new Map();
+
+function tileAt(ll){
+  if(!TILES) return null;
   const [x,y] = lonLatTo3857(ll[0], ll[1]);
-  const [w,s,e,n] = META.bounds_3857;
-  const px = Math.floor((x-w)/(e-w)*img.width);
-  const py = Math.floor((n-y)/(n-s)*img.height);
-  if(px<0||py<0||px>=img.width||py>=img.height) return -1;
-  return (py*img.width+px)*4;
+  const gx = Math.floor((x - TILES.west_3857) / TILES.res_m);
+  const gy = Math.floor((TILES.north_3857 - y) / TILES.res_m);
+  if(gx < 0 || gy < 0) return null;
+  const c = Math.floor(gx / TILES.px), r = Math.floor(gy / TILES.px);
+  if(r >= TILES.rows || c >= TILES.cols) return null;
+  return { r, c, px: gx % TILES.px, py: gy % TILES.px };
 }
 
-function inspect(ll){
-  if(!DATA||!META) return;
-  const i = pixelIndex(DATA, ll);
-  if(i<0 || DATA.data[i+3]===0) return;
-  const d = DATA.data;
-  const obsc = d[i]/2.55, tmin = d[i+1], hor = d[i+2]/4;
-
-  let road = 'fuori copertura';
-  const j = pixelIndex(ACC, ll);
-  if(j>=0 && ACC.data[j+3]!==0){
-    const m = ACC.data[j]*20;
-    road = m>=5000 ? '> 5 km' : (m<180 ? '< 180 m' : Math.round(m/10)*10+' m');
+// Si mette in cache la Promise, non l'immagine: due click ravvicinati sullo
+// stesso tassello condividono un solo download invece di lanciarne due.
+function getTile(kind, r, c){
+  const key = kind + '_' + r + '_' + c;
+  if(!tileCache.has(key)){
+    // Un tassello mancante e' mare o fuori area: 404 atteso, non un errore.
+    tileCache.set(key, loadImageData(v(TILES[kind].replace('{r}', r).replace('{c}', c)))
+      .catch(() => null));
   }
+  return tileCache.get(key);
+}
+
+function sampleTile(img, t){
+  if(!img) return null;
+  const i = (t.py * img.width + t.px) * 4;
+  return img.data[i + 3] === 0 ? null : [img.data[i], img.data[i+1], img.data[i+2]];
+}
+
+// Un click piu' recente non deve essere sovrascritto dal tassello di uno
+// precedente arrivato in ritardo.
+let inspectSeq = 0;
+
+// Prima il click fuori area non faceva nulla e sembrava che il sito fosse
+// rotto; su una mappa che e' per meta' mare capita spesso.
+function showNoData(ll){
+  $('#sel').style.display='none';
+  $('#sim-card').style.display='none';
+  $('#sel-empty').style.display='block';
+  $('#sel-empty').textContent =
+    'Nessun dato calcolato qui: il punto è in mare o fuori dal territorio italiano.';
+  showPopup(ll).setHTML('<span style="color:#8b98a8">fuori area calcolata</span>');
+}
+
+// Un popup per volta. Prima ogni click ne aggiungeva uno senza togliere il
+// precedente: dopo qualche punto la mappa era tappezzata, e a pannello chiuso
+// su telefono i popup coprivano proprio la mappa che si voleva vedere.
+let CURRENT_POPUP = null;
+function showPopup(ll){
+  if(CURRENT_POPUP) CURRENT_POPUP.remove();
+  CURRENT_POPUP = new maplibregl.Popup({closeButton:true, closeOnClick:false})
+    .setLngLat(ll).addTo(map);
+  return CURRENT_POPUP;
+}
+
+async function inspect(ll){
+  if(!TILES) return;
+  const t = tileAt(ll);
+  $('#sel-empty').style.display='none';
+  $('#sel').style.display='none';
+  $('#sim-card').style.display='none';
+  if(!t){ showNoData(ll); return; }
+
+  const seq = ++inspectSeq;
+  $('#sel-empty').style.display='block';
+  $('#sel-empty').textContent = 'Carico i dati di questa zona…';
+
+  const [dataImg, elevImg] = await Promise.all([
+    getTile('data', t.r, t.c), getTile('elev', t.r, t.c)
+  ]);
+  if(seq !== inspectSeq) return;
+
+  const d = sampleTile(dataImg, t);
+  if(!d){ showNoData(ll); return; }
+  const obsc = d[0]/2.55, tmin = d[1], hor = d[2]/4;
+  const e = sampleTile(elevImg, t);
 
   $('#sel-empty').style.display='none';
   $('#sel').style.display='block';
-  $('#v-obsc').textContent = obsc.toFixed(1);
+  // "Mai visibile" si riconosce dall'ORARIO, non dall'oscuramento. La
+  // pipeline marca quei punti con t_best = -1, che diventa 0 nel canale G;
+  // ma il ricampionamento a 250 m mescola quello 0 con i vicini validi e
+  // produce percentuali piccole ma non nulle (Cagliari usciva a 0.8%, sopra
+  // la vecchia soglia obsc<0.5, e mostrava un improbabile "19:00"). La
+  // finestra di calcolo parte alle 19:25, quindi qualsiasi minuto sotto 25
+  // non e' un orario: e' il sentinella, o la sua sbavatura.
+  const mai = tmin < 25;
+  $('#v-obsc').textContent = mai ? '0.0' : obsc.toFixed(1);
   const hh = 19+Math.floor(tmin/60), mm = Math.round(tmin%60);
-  $('#v-time').textContent = obsc<0.5 ? 'mai visibile'
+  $('#v-time').textContent = mai ? 'mai visibile'
     : String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+' CEST';
   // Se il Sole non emerge mai, l'angolo registrato non esiste: mostrarlo come
   // 0.00 farebbe leggere "orizzonte libero", che e' l'esatto contrario.
-  $('#v-hor').textContent = obsc<0.5 ? 'sempre coperto' : hor.toFixed(2)+'°';
-  $('#v-road').textContent = road;
+  $('#v-hor').textContent = mai ? 'sempre coperto' : hor.toFixed(2)+'°';
   $('#v-ll').textContent = ll[1].toFixed(4)+', '+ll[0].toFixed(4);
 
-  const col = obsc>=88?'#4ade80':obsc>=60?'#e1be3c':'#e07a4a';
-  new maplibregl.Popup({closeButton:false}).setLngLat(ll)
-    .setHTML('<b style="color:'+col+'">'+obsc.toFixed(1)+'%</b> di oscuramento visibile'+
-      '<br><span style="color:#8b98a8">ostacolo a '+hor.toFixed(2)+'° · strada a '+road+'</span>')
+  $('#v-elev').textContent = e ? (e[0]*256 + e[1]) + ' m' : 'fuori copertura';
+
+  const gmaps = 'https://www.google.com/maps?q='+ll[1].toFixed(6)+','+ll[0].toFixed(6);
+  $('#v-gmaps').href = gmaps;
+
+  CURRENT_SHARE_URL = location.origin + location.pathname
+    + '?lat=' + ll[1].toFixed(5) + '&lon=' + ll[0].toFixed(5);
+  history.replaceState(null, '', CURRENT_SHARE_URL);
+  $('#v-share-msg').textContent = '';
+
+  const col = mai ? '#e07a4a' : obsc>=88?'#4ade80':obsc>=60?'#e1be3c':'#e07a4a';
+  // Con l'orizzonte quasi piatto non c'e' nessun "ostacolo": se l'oscuramento
+  // e' basso e' perche' il Sole tramonta prima del massimo, non per i monti.
+  const causa = mai ? "il Sole non emerge mai sopra l'orizzonte reale"
+    : hor >= 1.0 ? 'ostacolo a ' + hor.toFixed(2) + '°'
+    : "orizzonte libero: limita l'ora del tramonto";
+  showPopup(ll)
+    .setHTML('<b style="color:'+col+'">'+(mai ? '0.0' : obsc.toFixed(1))+'%</b> di oscuramento visibile'+
+      '<br><span style="color:#8b98a8">'+causa+'</span>'+
+      '<br><a href="'+gmaps+'" target="_blank" rel="noopener noreferrer" style="color:#4ade80;text-decoration:none">Apri in Google Maps ↗</a>')
     .addTo(map);
+
+  updateSim(ll[1], ll[0], hor, mai);
 }
 
-$('#op').oninput = e => {
-  const v = +e.target.value/100;
-  if($('#t-score').checked) map.setPaintProperty('score','raster-opacity',v);
-  if($('#t-access').checked) map.setPaintProperty('access','raster-opacity',v);
+let CURRENT_SHARE_URL = null;
+$('#v-share').onclick = () => {
+  if(!CURRENT_SHARE_URL) return;
+  navigator.clipboard.writeText(CURRENT_SHARE_URL)
+    .then(() => { $('#v-share-msg').textContent = 'Link copiato negli appunti.'; })
+    .catch(() => { $('#v-share-msg').textContent = CURRENT_SHARE_URL; });
 };
-$('#t-score').onchange = e =>
-  map.setPaintProperty('score','raster-opacity', e.target.checked?+$('#op').value/100:0);
-$('#t-access').onchange = e =>
-  map.setPaintProperty('access','raster-opacity', e.target.checked?+$('#op').value/100:0);
-$('#t-sites').onchange = e => {
-  const v = e.target.checked?'visible':'none';
-  map.setLayoutProperty('sites','visibility',v);
-  map.setLayoutProperty('sites-halo','visibility',v);
-};
+
+$('#op').oninput = e => map.setPaintProperty('score','raster-opacity', +e.target.value/100);
+
+// --- Pannello a scomparsa (mobile) ----------------------------------------
+// La mappa e' l'oggetto principale ma su telefono il pannello ne mangia meta'
+// schermo. La maniglia sta sulla cucitura fra i due e, a pannello chiuso,
+// risale in cima allo schermo restando l'unico comando visibile.
+const panelToggle = $('#panel-toggle');
+
+function setPanel(open){
+  document.body.classList.toggle('map-full', !open);
+  panelToggle.setAttribute('aria-expanded', String(open));
+  $('#panel-toggle-icon').textContent = open ? '▲' : '▼';
+  $('#panel-toggle-text').textContent = open ? 'Nascondi pannello' : 'Mostra pannello';
+  // Il contenitore cambia altezza: senza resize il canvas resta della misura
+  // vecchia e la mappa appare tagliata o schiacciata.
+  map.resize();
+}
+
+panelToggle.onclick = () => setPanel(document.body.classList.contains('map-full'));
+
+// In orizzontale su telefono il pannello lascerebbe una striscia di mappa
+// troppo bassa per essere usata: si parte con la mappa a tutto schermo.
+if(window.matchMedia('(max-width: 768px) and (max-height: 460px)').matches){
+  setPanel(false);
+}
+
+// --- Simulazione grafica dell'eclissi nel punto selezionato ---------------
+// Riusa la stessa formula di pipeline/04_score.py (astronomy-engine, stessa
+// libreria in versione JS). L'orizzonte usato e' un'unica soglia costante
+// (il "hor" gia' mostrato in "Punto selezionato"), non il profilo a 28
+// azimut della pipeline: approssimazione accettabile perche' in questa
+// finestra di ~90 minuti l'azimut del Sole si sposta di soli ~20 gradi.
+const R_SUN_KM = 695700.0, R_MOON_KM = 1737.4, AU_KM = 149597870.7;
+const SIM_T0 = Date.UTC(2026, 7, 12, 17, 25, 0); // 19:25 CEST
+const SIM_T1 = Date.UTC(2026, 7, 12, 18, 55, 0); // 20:55 CEST
+const SIM_STEP_S = 30;
+const SIM_W = 300, SIM_H = 90;
+
+function obscurationFrac(d, rs, rm){
+  if(d >= rs + rm) return 0;
+  if(d <= Math.abs(rs - rm)) return Math.min(1, (rm / rs) ** 2);
+  const a1 = rs * rs * Math.acos((d * d + rs * rs - rm * rm) / (2 * d * rs));
+  const a2 = rm * rm * Math.acos((d * d + rm * rm - rs * rs) / (2 * d * rm));
+  const a3 = 0.5 * Math.sqrt(Math.max(0, (-d + rs + rm) * (d + rs - rm) * (d - rs + rm) * (d + rs + rm)));
+  return (a1 + a2 - a3) / (Math.PI * rs * rs);
+}
+
+function circumstances(date, obs){
+  const sun = Astronomy.Equator(Astronomy.Body.Sun, date, obs, true, true);
+  const moon = Astronomy.Equator(Astronomy.Body.Moon, date, obs, true, true);
+  const hs = Astronomy.Horizon(date, obs, sun.ra, sun.dec, 'normal');
+  const hm = Astronomy.Horizon(date, obs, moon.ra, moon.dec, 'normal');
+  const a1 = hs.altitude * Math.PI / 180, z1 = hs.azimuth * Math.PI / 180;
+  const a2 = hm.altitude * Math.PI / 180, z2 = hm.azimuth * Math.PI / 180;
+  const c = Math.sin(a1) * Math.sin(a2) + Math.cos(a1) * Math.cos(a2) * Math.cos(z1 - z2);
+  const sep = Math.acos(Math.max(-1, Math.min(1, c))) * 180 / Math.PI;
+  const rs = Math.asin(R_SUN_KM / (sun.dist * AU_KM)) * 180 / Math.PI;
+  const rm = Math.asin(R_MOON_KM / (moon.dist * AU_KM)) * 180 / Math.PI;
+  return { obsc: obscurationFrac(sep, rs, rm), alt: hs.altitude, sep, rs, rm };
+}
+
+function simulate(lat, lon, horDeg){
+  const obs = new Astronomy.Observer(lat, lon, 0);
+  const pts = [];
+  for(let t = SIM_T0; t <= SIM_T1; t += SIM_STEP_S * 1000){
+    const c = circumstances(new Date(t), obs);
+    pts.push({ t, obsc: c.obsc, sep: c.sep, rs: c.rs, rm: c.rm,
+      visible: c.alt > horDeg && c.alt > 0 });
+  }
+  return pts;
+}
+
+function fmtHM(ts){
+  const d = new Date(ts);
+  const h = (d.getUTCHours() + 2) % 24, m = d.getUTCMinutes();
+  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+}
+
+const svgNS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs){
+  const el = document.createElementNS(svgNS, tag);
+  for(const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+function buildChart(pts){
+  const svg = $('#sim-chart');
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const n = pts.length, t0 = pts[0].t, t1 = pts[n - 1].t;
+  const x = i => i / (n - 1) * SIM_W;
+  const y = v => SIM_H - Math.min(1, v / 0.95) * SIM_H;
+
+  svg.appendChild(svgEl('line', { x1: 0, y1: SIM_H, x2: SIM_W, y2: SIM_H, stroke: '#2a323d', 'stroke-width': 1 }));
+
+  const stepMs = 15 * 60 * 1000;
+  for(let t = Math.ceil(t0 / stepMs) * stepMs; t <= t1; t += stepMs){
+    const px = (t - t0) / (t1 - t0) * SIM_W;
+    svg.appendChild(svgEl('line', { x1: px, y1: SIM_H, x2: px, y2: SIM_H + 4, stroke: '#3a4453', 'stroke-width': 1 }));
+    const lab = svgEl('text', { x: px, y: SIM_H + 16, 'text-anchor': 'middle', fill: '#8b98a8', 'font-size': 9 });
+    lab.textContent = fmtHM(t);
+    svg.appendChild(lab);
+  }
+
+  const dTheo = 'M' + pts.map((p, i) => x(i).toFixed(1) + ' ' + y(p.obsc).toFixed(1)).join(' L');
+  svg.appendChild(svgEl('path', { d: dTheo, fill: 'none', stroke: '#4a5568', 'stroke-width': 1, 'stroke-dasharray': '3,3' }));
+
+  let dVis = 'M' + x(0).toFixed(1) + ' ' + SIM_H;
+  pts.forEach((p, i) => { dVis += ' L' + x(i).toFixed(1) + ' ' + y(p.visible ? p.obsc : 0).toFixed(1); });
+  dVis += ' L' + x(n - 1).toFixed(1) + ' ' + SIM_H + ' Z';
+  svg.appendChild(svgEl('path', { d: dVis, fill: '#4ade80', 'fill-opacity': 0.22, stroke: 'none' }));
+
+  const dLine = 'M' + pts.map((p, i) => x(i).toFixed(1) + ' ' + y(p.visible ? p.obsc : 0).toFixed(1)).join(' L');
+  svg.appendChild(svgEl('path', { d: dLine, fill: 'none', stroke: '#4ade80', 'stroke-width': 1.6 }));
+
+  const cursor = svgEl('line', { x1: 0, y1: 0, x2: 0, y2: SIM_H, stroke: '#e6edf3', 'stroke-width': 1, 'stroke-dasharray': '2,2' });
+  svg.appendChild(cursor);
+
+  return { svg, x, y, n, cursor };
+}
+
+function markVertical(chart, idx, color, label){
+  const px = chart.x(idx);
+  chart.svg.appendChild(svgEl('line', { x1: px, y1: 0, x2: px, y2: SIM_H, stroke: color, 'stroke-width': 1.4, 'stroke-dasharray': '4,2' }));
+  const anchor = px > SIM_W - 42 ? 'end' : (px < 42 ? 'start' : 'middle');
+  const t = svgEl('text', { x: px, y: 10, 'text-anchor': anchor, fill: color, 'font-size': 9 });
+  t.textContent = label;
+  chart.svg.appendChild(t);
+}
+
+function renderDisc(p){
+  const svg = $('#sim-disc');
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const R = 24;
+  const rm = R * (p.rm / p.rs);
+  const offset = R * (p.sep / p.rs);
+  const sunColor = p.visible ? '#f4b942' : '#3a4048';
+  svg.appendChild(svgEl('circle', { cx: 0, cy: 0, r: R, fill: sunColor }));
+  if(offset < R + rm){
+    svg.appendChild(svgEl('circle', { cx: offset, cy: 0, r: rm, fill: '#0b0f15' }));
+  }
+  if(!p.visible){
+    svg.appendChild(svgEl('path', {
+      d: 'M -29 8 L -15 -5 L -3 7 L 11 -9 L 29 10 L 29 29 L -29 29 Z',
+      fill: '#161b23', 'fill-opacity': 0.88
+    }));
+  }
+}
+
+let SIM_PTS = null, SIM_CHART = null, SIM_PLAY_RANGE = null, simPlayTimer = null;
+
+function stopPlay(){
+  if(simPlayTimer){ clearInterval(simPlayTimer); simPlayTimer = null; }
+  $('#sim-play').textContent = '▶ Riproduci';
+}
+
+function startPlay(){
+  if(!SIM_PTS || !SIM_PLAY_RANGE) return;
+  $('#sim-play').textContent = '⏸ Pausa';
+  let idx = SIM_PLAY_RANGE.start;
+  scrubToIndex(idx);
+  simPlayTimer = setInterval(() => {
+    idx++;
+    if(idx > SIM_PLAY_RANGE.end){ stopPlay(); return; }
+    scrubToIndex(idx);
+  }, 70);
+}
+
+$('#sim-play').onclick = () => { simPlayTimer ? stopPlay() : startPlay(); };
+
+function scrubToIndex(idx){
+  if(!SIM_PTS || !SIM_CHART) return;
+  idx = Math.max(0, Math.min(SIM_PTS.length - 1, idx));
+  const p = SIM_PTS[idx];
+  SIM_CHART.cursor.setAttribute('x1', SIM_CHART.x(idx));
+  SIM_CHART.cursor.setAttribute('x2', SIM_CHART.x(idx));
+  $('#sim-t').textContent = fmtHM(p.t) + ' CEST';
+  $('#sim-o').textContent = (p.visible ? (p.obsc * 100).toFixed(1) : '0.0') + '%';
+  $('#sim-status').textContent = p.visible
+    ? "Sole visibile sopra l'orizzonte reale" : 'Sole nascosto dietro i monti';
+  renderDisc(p);
+}
+
+let simScrubBound = false;
+function bindScrubOnce(){
+  if(simScrubBound) return;
+  simScrubBound = true;
+  const svg = $('#sim-chart');
+  const handler = e => {
+    if(!SIM_PTS || !SIM_CHART) return;
+    const rect = svg.getBoundingClientRect();
+    if(rect.width === 0) return;
+    const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const frac = Math.max(0, Math.min(1, cx / rect.width));
+    scrubToIndex(Math.round(frac * (SIM_PTS.length - 1)));
+  };
+  svg.addEventListener('pointerdown', e => { svg.setPointerCapture(e.pointerId); handler(e); });
+  svg.addEventListener('pointermove', e => { if(e.buttons || e.pointerType !== 'mouse') handler(e); });
+}
+
+function findCrossing(pts){
+  for(let i = 0; i < pts.length - 1; i++){
+    if(pts[i].visible && !pts[i + 1].visible) return i + 1;
+  }
+  return -1;
+}
+
+function updateSim(lat, lon, horDeg, maiVisibile){
+  stopPlay();
+  $('#sim-card').style.display = 'block';
+  const summary = $('#sim-summary');
+
+  if(typeof Astronomy === 'undefined'){
+    summary.textContent = 'Simulazione non disponibile (libreria astronomica non caricata).';
+    $('#sim-chart').innerHTML = ''; $('#sim-disc').innerHTML = '';
+    SIM_PTS = null; SIM_PLAY_RANGE = null; $('#sim-play').disabled = true;
+    $('#v-first').textContent = '–'; $('#v-last').textContent = '–';
+    return;
+  }
+
+  if(maiVisibile){
+    SIM_PTS = null; SIM_CHART = null; SIM_PLAY_RANGE = null; $('#sim-play').disabled = true;
+    $('#sim-chart').innerHTML = ''; $('#sim-disc').innerHTML = '';
+    $('#sim-t').textContent = '–'; $('#sim-o').textContent = '–'; $('#sim-status').textContent = '–';
+    summary.textContent = "In questo punto il Sole eclissato resta sempre sotto l'orizzonte reale: non è mai visibile.";
+    $('#v-first').textContent = 'mai visibile'; $('#v-last').textContent = 'mai visibile';
+    return;
+  }
+  $('#sim-play').disabled = false;
+
+  const pts = simulate(lat, lon, horDeg);
+  SIM_PTS = pts;
+  SIM_CHART = buildChart(pts);
+
+  const crossI = findCrossing(pts);
+  // "contatto" = Sole eclissato realmente in corso E sopra l'orizzonte reale,
+  // non solo sopra l'orizzonte (che includerebbe minuti prima che la Luna
+  // tocchi il disco solare).
+  let segStart = -1, segEnd = -1;
+  pts.forEach((p, i) => { if(p.visible){ if(segStart < 0) segStart = i; segEnd = i; } });
+  let contactStart = -1, contactEnd = -1;
+  pts.forEach((p, i) => { if(p.visible && p.obsc > 0.001){ if(contactStart < 0) contactStart = i; contactEnd = i; } });
+  $('#v-first').textContent = contactStart >= 0 ? fmtHM(pts[contactStart].t) + ' CEST' : 'mai visibile';
+  $('#v-last').textContent = contactEnd >= 0 ? fmtHM(pts[contactEnd].t) + ' CEST' : 'mai visibile';
+  SIM_PLAY_RANGE = segStart >= 0 ? { start: segStart, end: crossI >= 0 ? crossI : segEnd } : null;
+
+  if(segStart >= 0){
+    const durMin = Math.round((pts[segEnd].t - pts[segStart].t) / 60000);
+    // Su scala nazionale il Sole sparisce per due motivi diversi: al nord se
+    // lo mangia una montagna, al sud e' semplicemente il tramonto. Con
+    // l'orizzonte quasi piatto parlare di "monti" sarebbe sbagliato.
+    const orografico = horDeg >= 1.0;
+    if(crossI >= 0){
+      const residuo = (pts[crossI].obsc * 100).toFixed(0);
+      summary.innerHTML = 'Visibile da qui dalle <b>' + fmtHM(pts[segStart].t) + '</b> alle <b>' +
+        fmtHM(pts[segEnd].t) + '</b> (~' + durMin + ' min). Poi il Sole ' +
+        (orografico ? 'scompare dietro i rilievi' : 'tramonta') +
+        ', con ancora circa il <b>' + residuo + '%</b> di oscuramento teorico residuo.';
+      markVertical(SIM_CHART, crossI, '#e07a4a', orografico ? 'dietro i rilievi' : 'tramonto');
+    } else {
+      summary.innerHTML = 'Visibile da qui dalle <b>' + fmtHM(pts[segStart].t) + '</b> alle <b>' +
+        fmtHM(pts[segEnd].t) + "</b> (~" + durMin + " min): qui l'orizzonte non taglia l'eclissi, " +
+        'la fine è quella naturale del fenomeno.';
+    }
+  } else {
+    summary.textContent = "In questo punto il Sole eclissato resta sempre sotto l'orizzonte reale: non è mai visibile.";
+  }
+
+  bindScrubOnce();
+  let bestIdx = segStart >= 0 ? segStart : 0;
+  pts.forEach((p, i) => { if(p.visible && p.obsc > pts[bestIdx].obsc) bestIdx = i; });
+  scrubToIndex(bestIdx);
+}
 </script>
 </body>
 </html>

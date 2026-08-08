@@ -9,6 +9,14 @@ __pycache__/
 # web/public/data/ che invece e' il deliverable del sito e va committato.
 /data/
 
+# Tasselli dati generati da 06_export.py: 84 file, ~56 MB, riscritti da capo a
+# ogni esecuzione della pipeline. Committarli farebbe crescere il repo di una
+# cinquantina di MB per rigenerazione, in modo permanente. Il deploy avviene
+# via rsync dalla copia locale (vedi README §12), quindi non passa da git e
+# non ne ha bisogno. score.png e meta.json restano versionati: sono piccoli e
+# senza di loro il sito non parte nemmeno per un'occhiata.
+/web/public/data/tiles/
+
 # Documentazione con credenziali del server — non deve mai finire su GitHub
 ServerHP-ubuntu.md
 

@@ -1,19 +1,56 @@
-# Eclissi 12 agosto 2026 — dove guardarla in Piemonte
+# Eclissi 12 agosto 2026 — dove guardarla in Italia
 
 Mappa della visibilità reale dell'eclissi solare parziale del 12 agosto 2026,
-tenendo conto degli ostacoli orografici. MVP su Piemonte e aree confinanti;
-architettura pensata per estendersi a tutta Italia senza modifiche di codice.
+tenendo conto degli ostacoli orografici. Copre l'intero territorio italiano,
+da Lampedusa al Brennero.
 
 **Live:** https://eclisse.tongatron.org
 
 ---
 
-## 1. Il problema, in un numero
+## 1. Il problema, in due numeri
 
-In Piemonte l'eclissi inizia alle **19:28 CEST** ma il massimo è alle **20:21**,
-con il Sole a **2,6° di altezza** e azimut 288° (WNW, verso il tramonto). A
-quell'altezza, la visibilità dipende quasi interamente dal profilo
-dell'orizzonte nella direzione WNW:
+### Il Sole tramonta durante l'eclissi
+
+L'eclissi cade all'ora del tramonto, e il tramonto arriva prima a sud-est. Ne
+esce un gradiente enorme lungo la penisola che non ha niente a che vedere con
+le montagne: in mezza Italia il Sole sparisce sotto l'orizzonte **prima** di
+arrivare al massimo dell'eclissi.
+
+| Zona | Primo contatto | Massimo visibile | Oscuramento max |
+|---|---|---|---|
+| **Sardegna NO** (Stintino–Alghero) | 19:37 | 20:26 | **98,8%** |
+| Piemonte NO | 19:28 | 20:22 | 93,6% |
+| Alto Adige | 19:25 | 20:17 | 90,9% |
+| Sardegna sud | 19:38 | 20:25 | 88,4% |
+| Centro | 19:33 | 20:16 | 81,5% |
+| Lampedusa | 19:42 | 20:04 | 30,3% |
+| Calabria | 19:38 | 19:56 | 26,0% |
+| Sicilia SE | 19:40 | 19:56 | 20,9% |
+| Salento | 19:33 | 19:49 | **18,3%** |
+
+Da Lampedusa in giù nella tabella il "massimo visibile" coincide col tramonto:
+l'eclissi prosegue, ma sotto l'orizzonte.
+
+**Il risultato che la versione regionale non poteva vedere.** Il punto
+migliore d'Italia non è alpino: è la costa nord-occidentale della Sardegna,
+con un massimo su terraferma del **98,78%** a 40,88 N / 8,22 E (zona Porto
+Torres–Stintino), contro il 93,6% del Piemonte. La coda della fascia di
+totalità termina al tramonto poco al largo, a ovest dell'isola: sul mare lì
+l'oscuramento raggiunge il 100%.
+
+Con un margine così, però, la geometria diventa spietata: in Sardegna il Sole
+al momento migliore è a **0,1° di altezza**. Alghero e Sassari distano 35 km e
+il raster dà 88,6% alla prima e 97,6% alla seconda, per mezzo grado di
+differenza nell'orizzonte locale. È esattamente la ragione d'essere del
+progetto — solo che qui l'ostacolo critico non è una montagna da 3000 m, è una
+collina da 100.
+
+### Dove il Sole è ancora alto, decide l'orografia
+
+Al nord il Sole al massimo è a **2,6° di altezza**, azimut 288° (WNW). A
+quell'altezza la visibilità dipende quasi interamente dal profilo
+dell'orizzonte in quella direzione:
 
 | Orizzonte locale a 288° | Oscuramento max visibile |
 |---|---|
@@ -30,10 +67,14 @@ km, azimut 287,5°) sottende 3,5° e taglia il massimo, facendo perdere alla
 città **8 punti** di oscuramento rispetto a Vercelli, che è più lontana dalle
 Alpi ma le vede più basse all'orizzonte.
 
-Questo è il motivo per cui il progetto non è "colora di verde dove piove
-poco": l'80%+ della variazione di visibilità in Piemonte è spiegata
-dall'orografia, non dalla differenza di orario o di posizione del Sole (che
-varia solo di ~1 grado in altezza su tutta l'AOI).
+I due effetti si sommano e vanno tenuti distinti quando si legge la mappa: a
+sud-est il rosso significa "già tramontato", sulle Alpi significa "dietro una
+montagna". Il criterio di calcolo è lo stesso — il Sole conta solo finché è
+sopra l'orizzonte *reale* — ma la causa è diversa.
+
+Questo è anche il motivo per cui il progetto non è "colora di verde dove piove
+poco": al nord la gran parte della variazione locale di visibilità è spiegata
+dall'orografia, non dalla posizione del Sole.
 
 ---
 
@@ -44,36 +85,62 @@ pipeline/                    (Python, offline, eseguito una volta prima dell'eve
   config.py                  parametri condivisi: date, bbox, CRS, risoluzioni
   01_download_dem.py    -->  data/dem_tiles/*.tif       (Copernicus GLO-90, WGS84)
   02_build_grid.py      -->  data/derived/dem_aeqd.tif  (mosaico, riproiettato)
-  03_horizon.py         -->  data/derived/horizon.tif   (angolo orizzonte x 28 azimut)
+  03_horizon.py         -->  data/derived/horizon.tif   (angolo orizzonte x 26 azimut)
                          -->  data/derived/obs.tif       (posizione/quota osservatore)
   04_score.py           -->  data/derived/score.tif     (punteggio finale, 4 bande)
-  05_access.py          -->  data/derived/access.tif    (distanza da strada)
-  06_export.py          -->  web/public/data/*.png,json,geojson
+  05_access.py               distanza da strada — NON usato dalla mappa nazionale, vedi §4
+  06_export.py          -->  web/public/data/{score.png,meta.json,tiles/*.png}
   validate.py                controllo di sanità, nessun output persistente
 
 web/public/                  (sito statico, nessun backend)
   index.html                 MapLibre GL + logica di lettura pixel
   data/
-    score.png                heatmap RGBA (visualizzazione)
-    data.png                 raster RGBA "dati" (oscuramento/ora/orizzonte codificati nei canali)
-    access.png               raster RGBA (distanza da strada, canale singolo replicato)
-    meta.json                bounding box EPSG:3857 e legenda della codifica
-    sites.geojson             top-20 punti panoramici raggiungibili
+    score.png                heatmap RGBA d'insieme a 600 m (l'unico raster caricato all'avvio)
+    meta.json                bounding box EPSG:3857, legenda della codifica, griglia dei tasselli
+    tiles/data_{r}_{c}.png   oscuramento/ora/orizzonte a 250 m, 1024 px per tassello
+    tiles/elev_{r}_{c}.png   quote a 250 m, stessa griglia
 ```
 
 Non c'è database né backend: la pipeline gira una volta (o ogni volta che
 cambiano i dati di input), produce file statici, e il sito li legge via
-`fetch()`. Rigenerare tutto costa ~5 minuti di calcolo.
+`fetch()`.
+
+### Perché due prodotti raster e non uno
+
+Su scala nazionale un unico PNG alla risoluzione di analisi sarebbe
+6706 × 8741 px: **70 MB** di file e **234 MB** di `ImageData` una volta
+decodificato in un canvas, per ognuna delle immagini che il frontend
+interroga. Insostenibile su telefono. Quindi:
+
+- `score.png` è la sola immagine scaricata all'avvio, a 600 m: serve a
+  *vedere* la mappa, e a zoom nazionale il dettaglio fine non sarebbe
+  comunque distinguibile;
+- i valori esatti che compaiono cliccando stanno in `tiles/`, a 250 m. Il
+  browser scarica un tassello (più il gemello delle quote) solo per la zona
+  cliccata, e lo tiene in cache.
+
+I tasselli interamente vuoti non vengono scritti affatto: il frontend tratta
+il 404 come "nessun dato". In pratica ne restano pochi, perché **anche il mare
+ha dati validi**: sul mare il DEM vale 0 e l'orizzonte è libero, quindi
+l'oscuramento lì è calcolato e sensato. Dopo il ritaglio sull'AOI la griglia è
+7 × 6 tasselli e vengono scritti tutti.
+
+**I tasselli non sono versionati in git** (`.gitignore`): sono 84 file per
+~56 MB, riscritti da capo a ogni esecuzione della pipeline, e il deploy passa
+da `rsync` sulla copia locale, non da git. `score.png` e `meta.json` restano
+versionati. Conseguenza pratica: da un clone pulito il sito si apre e mostra
+la mappa, ma il click non trova i dati finché non si rigenera la pipeline (o
+si copiano i tasselli da una macchina che li ha).
 
 ### Perché un raycast e non un viewshed a 360°
 
 Il problema apparente ("dove si vede meglio l'eclissi") sembra richiedere un
 viewshed completo (visibilità in ogni direzione). Ma il Sole occupa una fascia
-di azimut stretta e nota in anticipo (277–299° di griglia, vedi §4), quindi
-basta calcolare l'orizzonte in quella fascia: O(28 azimut × N celle) invece di
+di azimut stretta e nota in anticipo (273–298° di griglia, vedi §4), quindi
+basta calcolare l'orizzonte in quella fascia: O(26 azimut × N celle) invece di
 O(360 azimut × N celle), e senza dover fare line-of-sight fra coppie di punti.
-Questo è ciò che rende il problema trattabile su un intero raster regionale in
-pochi minuti invece di ore.
+Questo è ciò che rende il problema trattabile su un raster nazionale da 45
+milioni di celle in un'ora invece che in giorni.
 
 ---
 
@@ -93,17 +160,18 @@ esserlo. Il progetto le tratta esplicitamente:
    azimutale equidistante (AEQD) centrata sull'AOI, dove gli **azimut di
    griglia** (rispetto al nord della proiezione) divergono dagli **azimut
    veri** (rispetto al nord geografico locale) man mano che ci si allontana
-   dal meridiano centrale. Sull'AOI (~220×290 km) questa divergenza (gamma)
-   arriva a ±1,06°. Viene ricalcolata per singola cella con una differenza
+   dal meridiano centrale. Sull'AOI nazionale questa divergenza (gamma)
+   arriva a ±4,4°. Viene ricalcolata per singola cella con una differenza
    finita (spostamento di 0,01° in latitudine, trasformato in AEQD) e sommata
    all'azimut vero prima di interrogare il raster dell'orizzonte.
 
-3. **Variazione spaziale delle efemeridi.** Sull'AOI l'altezza del Sole
-   all'istante del massimo varia di ~2,5°, un intervallo confrontabile con la
-   soglia stessa: usare un solo calcolo di efemeridi per tutta l'area
-   introdurrebbe un errore sistematico crescente ai bordi. Le efemeridi sono
-   calcolate su una griglia rada 6×6 e interpolate bilinearmente per cella a
-   ogni passo temporale.
+3. **Variazione spaziale delle efemeridi.** Sull'AOI nazionale (1000×1300 km)
+   le circostanze cambiano moltissimo — l'oscuramento massimo visibile va dal
+   94% in Piemonte al 18% in Salento — quindi un solo calcolo di efemeridi per
+   tutta l'area sarebbe privo di senso. Sono calcolate su una griglia rada
+   `NODES`×`NODES` e interpolate bilinearmente per cella a ogni passo
+   temporale; `NODES` è passato da 6 a **16** proprio per questo, perché con 6
+   nodi il passo sarebbe stato di 260 km.
 
 Tutti e tre gli effetti sono verificati indipendentemente in `validate.py`
 (vedi §8).
@@ -117,11 +185,11 @@ Tutti e tre gli effetti sono verificati indipendentemente in `validate.py`
 | Parametro | Valore | Motivo |
 |---|---|---|
 | `T_START_UTC` … `T_END_UTC` | 17:15–19:00 UTC (19:15–21:00 CEST) | finestra che copre tutto l'evento con margine |
-| `DEM_LAT/LON_MIN/MAX` | 43–47°N, 3–9°E | bbox di **download** del DEM: 250 km di buffer a ovest del Piemonte, perché è da lì che arrivano le Alpi che tagliano il Sole |
-| `AOI_LAT/LON_MIN/MAX` | 44,0–46,6°N, 6,5–9,3°E | bbox di **output** (Piemonte + margine) |
-| `CRS_WORK` | AEQD, `lat_0=45.3 lon_0=7.9` | proiezione azimutale equidistante centrata sull'AOI: distanze e azimut dal centro sono geometricamente esatti, a differenza di EPSG:3035 che introdurrebbe 1–3° di convergenza non corretta |
+| `DEM_LAT/LON_MIN/MAX` | 35–47°N, 3–18°E | bbox di **download** del DEM (208 tile, 163 esistenti): i raggi puntano a ovest, quindi il buffer che conta è quello a ovest — E003 copre con margine i 150 km a ovest dell'osservatore più occidentale (6,6°E) |
+| `AOI_LAT/LON_MIN/MAX` | 35,4–47,15°N, 6,55–18,60°E | bbox di **output**: l'Italia intera con un margine |
+| `CRS_WORK` | AEQD, `lat_0=42.0 lon_0=12.5` | azimutale equidistante centrata sull'AOI: distanze e azimut dal centro sono geometricamente esatti. Il centro è in mezzo alla penisola e non più in Piemonte: da 45,3/7,9 la convergenza dei meridiani arrivava a −7,8° in Salento, da 42,0/12,5 resta entro ±4,4°. Su 1300 km di raggio la deformazione trasversale resta sotto lo 0,5% |
 | `RES_M` | 90 m | risoluzione nativa del DEM Copernicus GLO-90 |
-| `AZ_MIN/MAX/STEP` | 272–299°, passo 1° | il Sole (azimut vero) copre 278–292°; l'intervallo è allargato di ~5° per lato per assorbire la convergenza dei meridiani |
+| `AZ_MIN/MAX/STEP` | 273–298°, passo 1° | misurato, non stimato: sull'Italia intera il Sole eclissato è sopra l'orizzonte con azimut **vero** fra 278,7° e 293,3°; sommata la convergenza (±4,4°) servono 274,3–297,5°, arrotondati con margine |
 | `MAX_RANGE_M` (in `03_horizon.py`, `PLAN`) | 150 km | vedi calcolo sotto |
 | `R_EFF_M` | 7/6 · R_terra | curvatura + rifrazione standard |
 
@@ -134,7 +202,7 @@ che riporta il calcolo.
 
 ### `01_download_dem.py`
 
-Scarica 35 tile Copernicus DEM GLO-90 (30 m nativi, qui usati alla risoluzione
+Scarica 208 tile Copernicus DEM GLO-90 (30 m nativi, qui usati alla risoluzione
 di pubblicazione 90 m) dal bucket pubblico AWS Open Data
 (`copernicus-dem-90m.s3.eu-central-1.amazonaws.com`), in parallelo (8
 thread). I tile marittimi assenti (404) sono normali e trattati come mare.
@@ -143,9 +211,11 @@ attribuzione obbligatoria per uso non commerciale, ma buona pratica citarla).
 
 ### `02_build_grid.py`
 
-Mosaica i 35 tile (`rasterio.merge`) e riproietta in AEQD a 90 m
+Mosaica i 163 tile esistenti (`rasterio.merge`) e riproietta in AEQD a 90 m
 (`rasterio.warp.reproject`, resampling bilineare). Nodata trattato come
 mare (0 m): non ostruisce l'orizzonte, comportamento corretto per l'uso.
+Griglia risultante 16498 × 16247 celle (365 MB, quote da −30 a 4788 m); ~30 s,
+picco di memoria 2,4 GB.
 
 ### `03_horizon.py` — il cuore geometrico
 
@@ -180,11 +250,39 @@ osservatore reale si metterebbe.
 
 **Finestra AOI.** Solo la sotto-regione geografica dell'AOI viene scritta in
 output (righe/colonne calcolate proiettando gli angoli AOI in AEQD); il resto
-del DEM serve solo da bersaglio dei raggi. Riduce l'output da ~40M a ~2M
-celle per banda.
+del DEM serve solo da bersaglio dei raggi. Sul dominio nazionale riduce
+l'output da 268M a 44,75M celle per banda (7346 × 6092 a 180 m).
+
+**Blocchi da 300k celle.** Il raycast processa gli osservatori a blocchi
+invece che tutti insieme. Il calcolo è identico; cambia solo la dimensione dei
+temporanei. Su 45M celle, `xs`/`ys`/`cc`/`rr`/`ht` sarebbero sei array da
+centinaia di MB ciascuno, che escono dalla cache a ogni passo del raggio.
+Misurato sullo stesso azimut, a parità di risultato:
+
+| Blocco | Tempo/azimut |
+|---|---|
+| tutte le celle insieme | 523 s |
+| 2M celle | 221 s |
+| 300k celle | **152 s** |
+
+Stessa ragione dietro due altre scelte: le coordinate osservatore sono
+`float32` e non `float64` (a ~1,5·10⁶ m un float32 risolve 0,12 m, irrilevante
+su celle da 90 m, e risparmia 360 MB per array), e la selezione
+dell'osservatore confronta `s*s` sottogriglie sfalsate — che sono viste a
+passo costante — invece di usare `reshape`+`transpose`+`argmax`, che
+materializzava due copie da 716 MB.
+
+**Scrittura banda per banda.** Ogni banda si calcola e si scrive subito.
+Tenerle tutte in memoria sarebbe costato 2,4 GB su una macchina da 8,6 GB. Il
+profilo GTiff usa `interleave=band` (si scrive una banda intera alla volta:
+con l'interleave per pixel ogni scrittura toccherebbe e ricomprimerebbe tutti
+i tile del file) e **`BIGTIFF=YES`**, obbligatorio perché 26 bande × 44,75M
+celle superano il limite di 4 GB degli offset del TIFF classico — GDAL non se
+ne accorge alla creazione, fallisce a metà scrittura con `Maximum TIFF file
+size exceeded`.
 
 **Output:**
-- `horizon.tif` — 28 bande int16 (una per azimut di griglia, passo 1°), unità
+- `horizon.tif` — 26 bande int16 (una per azimut di griglia, passo 1°), unità
   centesimi di grado, nodata `-32768`. Tag `scale_centideg`, `az_min`,
   `az_max`, `az_step`.
 - `obs.tif` — 3 bande float32: quota dell'osservatore selezionato (m),
@@ -192,13 +290,14 @@ celle per banda.
   coincide col centro del pixel di output, essendo la cella più alta del
   blocco).
 
-Tempo di calcolo: ~5–8 s/azimut sull'AOI, ~2,5 minuti totali.
+Tempo di calcolo: ~150 s/azimut sull'AOI nazionale, **~70 minuti totali**.
+È di gran lunga lo stadio più lento della pipeline.
 
 ### `04_score.py` — dalla geometria all'osservabilità
 
 Per ogni cella e ogni passo temporale (20 s, da 19:25 a 20:55 CEST):
 
-1. Efemeridi Sole/Luna interpolate bilinearmente dalla griglia rada 6×6
+1. Efemeridi Sole/Luna interpolate bilinearmente dalla griglia rada 16×16
    (`astronomy-engine`, altezza e azimut **apparenti**, cioè già rifratti da
    `A.Refraction.Normal` — coerente con l'uso di `R_eff` per il terreno: il
    confronto è apparente-contro-apparente, quello che vede davvero
@@ -221,10 +320,30 @@ Per ogni cella e ogni passo temporale (20 s, da 19:25 a 20:55 CEST):
 | 3 | `t_best_min_after_1900` | minuti dopo le 19:00 CEST dell'istante migliore |
 | 4 | `hor_used_deg` | angolo di orizzonte usato in quell'istante |
 
-Tempo di calcolo: ~35–40 s per l'intero ciclo (271 passi × 2M celle,
+**Due accorgimenti per la scala nazionale.** Le efemeridi sui nodi si
+calcolano **una volta sola** per tutti i passi temporali, prima del ciclo
+principale: dipendono solo dai nodi, non dalla porzione di griglia in
+lavorazione. E la griglia si processa a **strisce di righe** (`STRIPE_ROWS`),
+perché `src.read()` su tutte le bande costerebbe 4,8 GB di float32; a strisce
+ne restano ~250 MB per volta. Ogni cella è indipendente dalle altre, quindi il
+risultato è identico a quello del ciclo su tutta la griglia.
+
+Tempo di calcolo: ~20 minuti per l'intero ciclo (271 passi × 44,75M celle,
 vettorizzato con NumPy — nessun loop Python su singole celle).
 
-### `05_access.py` — un buon panorama serve a poco se non ci arrivi
+### `05_access.py` — non fa parte della mappa nazionale
+
+**Questo stadio non viene eseguito** nella pipeline nazionale, e il suo output
+non è più letto da `06_export.py`. Serviva a scegliere i 20 punti panoramici
+migliori scartando quelli irraggiungibili; su scala nazionale una classifica
+assoluta finirebbe tutta in Piemonte e Valle d'Aosta, dove l'oscuramento è
+massimo, e sarebbe inutile per chi guarda da Sicilia o Salento. La mappa è
+quindi puramente esplorativa: cerca un comune, o clicca un punto.
+
+Il codice resta nel repo, funzionante, perché è il punto di partenza naturale
+se si vuole reintrodurre una classifica per regione (servirebbe
+`italy-latest.osm.pbf`, ~2 GB, al posto dell'estratto nord-ovest). Quanto
+segue descrive com'è fatto.
 
 Legge un estratto **Geofabrik** (`nord-ovest-latest.osm.pbf`, Piemonte + Valle
 d'Aosta + Liguria + Lombardia, licenza OSM **ODbL**) con `pyosmium`
@@ -254,12 +373,30 @@ copertura.
 
 Riproietta tutto in **EPSG:3857** (obbligatorio: un `ImageSource` di MapLibre
 GL mappa i quattro angoli dell'immagine linearmente sulla mappa, quindi
-qualunque altro CRS produrrebbe una distorsione visibile) a 200 m di
-risoluzione, e scrive PNG **senza dipendenze esterne** (encoder PNG scritto a
-mano con `struct` + `zlib`, RGBA, deflate compressione 6) per evitare Pillow
-come dipendenza pesante.
+qualunque altro CRS produrrebbe una distorsione visibile) e scrive PNG **senza
+dipendenze esterne** (encoder PNG scritto a mano con `struct` + `zlib`, RGBA,
+deflate compressione 6) per evitare Pillow come dipendenza pesante.
 
-**Codifica di `data.png`** (il raster "dati", non la heatmap visiva):
+Produce due cose a risoluzioni diverse — il perché è in §2:
+
+| Prodotto | Risoluzione | Quando viene scaricato |
+|---|---|---|
+| `score.png` | 600 m | all'avvio, sempre |
+| `tiles/data_{r}_{c}.png` | 250 m, 1024 px | al primo click in quella zona |
+| `tiles/elev_{r}_{c}.png` | 250 m, 1024 px | idem |
+
+I 600 m della vista d'insieme non sono un compromesso estetico: un
+`ImageSource` di MapLibre **è una texture WebGL**, e molte GPU mobili si
+fermano a 4096 px per lato. A 600 m l'immagine è 2235 × 2913 e passa; a 400 m
+sarebbe 3353 × 4370 e su quei dispositivi la mappa resterebbe semplicemente
+vuota.
+
+Il bounding box EPSG:3857 è calcolato **una volta sola** (`bbox_3857()`) e le
+due griglie ci vengono ancorate sopra con transform espliciti, così restano
+allineate: se ognuna calcolasse i propri bound, gli arrotondamenti le
+sfaserebbero di qualche pixel.
+
+**Codifica dei tasselli `data`** (i valori veri, non la heatmap visiva):
 
 | Canale | Contenuto | Decodifica |
 |---|---|---|
@@ -268,22 +405,23 @@ come dipendenza pesante.
 | B | angolo di orizzonte usato, gradi | `B / 4` (range utile 0–63,75°) |
 | A | 255 se valido, 0 fuori area calcolata | — |
 
-`access.png` replica la distanza (m/20, clampata a 255 → 5100 m) sui tre
-canali RGB per compatibilità visiva, alpha a 0 fuori copertura.
+**Codifica dei tasselli `elev`**: `quota_m = R * 256 + G`, alpha come sopra.
+Servono due immagini perché quattro canali non bastano a tenere insieme
+oscuramento, orario, orizzonte, quota a 16 bit e maschera di validità.
+
+I tasselli di bordo vengono riempiti fino a 1024 px, così il frontend
+indicizza con una formula sola senza conoscere la dimensione di ognuno. Quelli
+interamente vuoti non vengono scritti: il 404 **è** il valore "nessun dato".
 
 `score.png` è la heatmap **visiva**: rampa di colore rosso→arancio→giallo→
 verde con stop a 0/50/75/88/94% (vedi `ramp()`, duplicata in JS in
 `index.html` per la legenda — se si cambia una rampa va cambiata anche
 l'altra).
 
-`meta.json` contiene i bound EPSG:3857 e gli angoli in lon/lat (per
-`ImageSource.coordinates` di MapLibre, che vuole WGS84).
-
-`sites.geojson`: top-20 punti panoramici. Selezione: celle con
-`obsc_vis ≥ 92%` **e** `dist_strada ≤ 300 m`, ordinate per un punteggio
-composito (oscuramento primario, distanza da strada e quota come
-spareggio), con **separazione minima di 12 km** fra siti scelti (evita che i
-20 risultati siano tutti sulla stessa cresta).
+`meta.json` contiene i bound EPSG:3857, gli angoli in lon/lat (per
+`ImageSource.coordinates` di MapLibre, che vuole WGS84) e il blocco `tiles`
+con origine, risoluzione, dimensione e numero di righe/colonne della griglia
+dei tasselli.
 
 ---
 
@@ -292,14 +430,32 @@ spareggio), con **separazione minima di 12 km** fra siti scelti (evita che i
 Pagina singola, nessun bundler, MapLibre GL da CDN. Nessun backend: tutta la
 logica di lettura pixel gira nel browser.
 
-- **Overlay raster**: `score.png` e `access.png` come `ImageSource` di
-  MapLibre, opacità regolabile da slider.
-- **Ispezione al click**: `data.png` e `access.png` vengono caricati anche
-  come `ImageData` via `<canvas>` (non solo mostrati come layer), così un
-  click sulla mappa può leggere direttamente i valori del pixel sotto il
-  cursore (proiezione manuale lon/lat → EPSG:3857 → indice pixel, replicando
-  la trasformazione di Web Mercator lato client per evitare una chiamata di
-  rete).
+- **Overlay raster**: `score.png` come `ImageSource` di MapLibre, opacità
+  regolabile da slider. È l'unico raster caricato all'avvio.
+- **Ispezione al click, a tasselli**: al click si calcola quale tassello copre
+  il punto (proiezione manuale lon/lat → EPSG:3857 → indice di tassello e
+  pixel, replicando Web Mercator lato client per evitare una chiamata di
+  rete), si scaricano `data` ed `elev` di quel solo tassello e si leggono come
+  `ImageData` via `<canvas>`. Dettagli che contano:
+  - la **cache contiene la Promise**, non l'immagine: due click ravvicinati
+    sullo stesso tassello condividono un download invece di lanciarne due;
+  - un contatore di sequenza scarta la risposta di un click ormai superato,
+    così un tassello lento non sovrascrive un click più recente;
+  - il 404 di un tassello mancante è atteso (mare, fuori area) e viene
+    tradotto in "nessun dato", non in un errore;
+  - il click fuori area ora lo dice esplicitamente. Prima non succedeva
+    nulla e sembrava che il sito fosse rotto — su una mappa che è in larga
+    parte mare, capita di continuo.
+- **Pannello a scomparsa (mobile)**: sotto i 768 px il pannello occupa
+  `46dvh` in cima e la mappa il resto; una maniglia sulla cucitura fra i due
+  lo chiude, e la mappa va a tutto schermo. A pannello chiuso la maniglia
+  risale in cima allo schermo. Note di implementazione: `dvh` e non `vh`
+  (su iOS la barra degli indirizzi che si ritrae cambia `vh` e lascerebbe la
+  mappa tagliata); `overflow:hidden` su `html,body` (col documento
+  scrollabile il trascinamento sulla mappa muoveva la pagina); `map.resize()`
+  a ogni cambio di stato, altrimenti il canvas resta della misura vecchia;
+  in orizzontale su telefono il pannello parte già chiuso, perché lascerebbe
+  una striscia di mappa inutilizzabile.
 - **Race condition nota e risolta**: `map.addSource()` va chiamato solo dopo
   l'evento `load` dello style; l'app aspetta `mapReady` insieme al
   caricamento dei dati con `Promise.all`.
@@ -308,9 +464,9 @@ logica di lettura pixel gira nel browser.
   della mappa può avvenire prima che il layout CSS sia definitivo.
 - **Ricerca comune**: campo di testo in cima al pannello, geocoding
   client-side via API `search` di **Nominatim/OpenStreetMap**
-  (`nominatim.openstreetmap.org`), con `viewbox` limitato ai bound del DEM
-  (`3,47,9,43`, `bounded=1`) e `countrycodes=it` per scartare risultati fuori
-  area. Input con debounce di 400 ms e `AbortController` per annullare le
+  (`nominatim.openstreetmap.org`), con `viewbox` limitato ai bound dell'AOI
+  (`6.55,47.15,18.6,35.4`, `bounded=1`) e `countrycodes=it` per scartare
+  risultati fuori area. Input con debounce di 400 ms e `AbortController` per annullare le
   richieste stale mentre l'utente digita. Alla selezione di un risultato:
   `map.flyTo()` sul punto e chiamata a `inspect()` come per un click sulla
   mappa. Nessuna chiave API richiesta; rispetta la usage policy di Nominatim
@@ -345,19 +501,29 @@ python3 -m venv .venv
 ```
 
 ```bash
+cd pipeline
+for s in 01_download_dem 02_build_grid 03_horizon 04_score 06_export validate; do
+  ../.venv/bin/python -u $s.py
+done
+```
+
+`05_access` non è nell'elenco: vedi §4: non fa parte della mappa nazionale.
+Solo se lo si vuole reintrodurre servono gli estratti OSM:
+
+```bash
 curl -sL -o data/nord-ovest.osm.pbf https://download.geofabrik.de/europe/italy/nord-ovest-latest.osm.pbf
 curl -sL -o data/nord-ovest.poly    https://download.geofabrik.de/europe/italy/nord-ovest.poly
 ```
 
-```bash
-cd pipeline
-for s in 01_download_dem 02_build_grid 03_horizon 04_score 05_access 06_export validate; do
-  ../.venv/bin/python $s.py
-done
-```
+Tempi indicativi sul dominio nazionale (Apple M3, 8,6 GB di RAM): DEM 528 MB /
+208 tile richiesti, 163 esistenti (i mancanti sono mare); `02_build_grid`
+~30 s; `03_horizon` **~70 min**; `04_score` ~20 min; `06_export` ~2 min.
+Rigenerare tutto da zero è quindi una cosa da un'ora e mezza, non da cinque
+minuti come nella versione regionale.
 
-Tempi indicativi: DEM 154 MB / 35 tile, `03_horizon` ~2,5 min, `04_score`
-~40 s, `05_access` ~1–2 min (dominato dal parsing del PBF), `06_export` ~10 s.
+Su una macchina con poca RAM conviene non fare altro nel frattempo:
+`03_horizon` e `04_score` sono stati scritti apposta per stare sotto i ~4 GB
+(vedi §4), ma il margine non è enorme.
 
 Sito in locale:
 
@@ -413,17 +579,30 @@ dopo il fix, che ha spostato l'osservatore sulla cella più alta del blocco
   vegetazione ed edifici mediati sulla cella. Ostacoli sotto ~100–200 m di
   altezza (alberi isolati, edifici, tralicci) non sono rappresentati in modo
   affidabile a questa risoluzione.
-- **Accessibilità stradale disponibile solo dentro il footprint** dell'estratto
-  Geofabrik nord-ovest (~66% della griglia AOI): fuori è `NaN`, cioè "non
-  calcolato", non "molto lontano" — la UI lo mostra come "fuori copertura".
-- **Mulattiere e sentieri (`track`) esclusi** dalla rete carrozzabile:
-  raggiungere un punto panoramico in serata presuppone un mezzo normale.
-- **Nessun modello di traffico o parcheggio**: "vicino a una strada" non
-  implica che ci sia dove fermarsi.
+- **Nessuna informazione di accessibilità**: la classifica dei punti
+  panoramici è stata rimossa passando a scala nazionale (vedi §4). La mappa
+  dice dove si vede, non se ci si arriva in auto o se c'è dove parcheggiare.
+- **La vista d'insieme è a 600 m, i valori cliccabili a 250 m**, mentre
+  l'analisi gira a 180 m. Il colore che si vede sulla mappa è quindi più
+  grossolano del numero che compare cliccando: su creste strette i due
+  possono discordare, e il numero è quello giusto.
+- **Al sud il rosso ha un significato diverso**: non "montagna davanti" ma
+  "Sole già tramontato". Il valore è corretto, ma cercare un punto panoramico
+  migliore in Salento non serve a niente — non è un problema di orizzonte
+  locale, e nessuna cima lo risolve.
+- **In Sardegna il margine è di frazioni di grado.** Col Sole a 0,1° di
+  altezza, la differenza fra 98% e 88% è mezzo grado di orizzonte, cioè una
+  collina di 100 m a 10 km. A quelle altezze contano cose che il modello non
+  ha: rifrazione anomala sul mare, foschia costiera, la quota esatta da cui
+  si guarda. I valori sardi vanno letti come "ottimi ma fragili", non come
+  una promessa.
+- **Striature radiali sul mare.** A est di Corsica e Sardegna si vedono raggi
+  sfrangiati: sono l'ombra reale di quei rilievi (una cella di mare guarda a
+  WNW e vede le montagne còrse), resa a scalini dal passo di 1° in azimut e
+  dai blocchi max-pool da 2160 m del campo lontano. È un artefatto di
+  rendering su celle marine, non tocca i valori sulla terraferma.
 - **Nessun fattore meteo** (vedi §10): un punto con visibilità geometrica del
   94% può essere completamente coperto da nuvole quella sera.
-- Il punteggio composito di `sites.geojson` privilegia oscuramento e vicinanza
-  a strada in parti uguali circa; non è stato tarato con un test utente.
 
 ---
 
@@ -441,23 +620,23 @@ dopo il fix, che ha spostato l'osservatore sulla cella più alta del blocco
 - **Grafico del profilo d'orizzonte** nel popup di dettaglio: disegnare la
   curva `horizon(azimut)` sovrapposta alla traiettoria del Sole (con i dischi
   Sole/Luna all'istante migliore) per il punto cliccato. I dati ci sono già
-  in `horizon.tif`/`data.png`; serve solo un piccolo canvas SVG lato client
-  che legga le 28 bande — oggi il raster dati esportato ne porta solo il
-  valore all'istante migliore, non l'intero profilo, quindi servirebbe
-  esportare anche `horizon.tif` (o un suo sottocampionamento) verso il web.
-- **DEM ad alta risoluzione** (5 m, Geoportale Piemonte) applicato *solo* ai
-  siti finalisti della classifica, per raffinare gli ultimi metri attorno alle
-  creste dov'è più facile che la griglia a 180 m sbagli di qualche punto
-  percentuale.
-- **Estensione a tutta Italia**: cambiare `DEM_LAT/LON_MIN/MAX` e
-  `AOI_LAT/LON_MIN/MAX` in `config.py`; nessun'altra modifica di codice è
-  necessaria. Il costo cresce linearmente con l'area (l'Italia intera è
-  ~5× l'AOI attuale ⇒ stima ~15–20 min di calcolo totale). L'estratto OSM
-  andrebbe sostituito con l'estratto Italia completo di Geofabrik.
-- **Mobile**: il layout a due colonne (pannello fisso + mappa) non è ancora
-  responsive sotto ~600px di larghezza.
-- Validare la classifica dei 20 siti con un secondo criterio indipendente
-  (es. presenza di parcheggio OSM entro 200 m) prima di pubblicizzarla.
+  in `horizon.tif`; serve solo un piccolo canvas SVG lato client che legga le
+  26 bande — oggi i tasselli dati portano solo il valore all'istante migliore,
+  non l'intero profilo, quindi servirebbe esportare anche `horizon.tif` (o un
+  suo sottocampionamento) verso il web.
+- **Classifica dei punti panoramici per regione.** Rimossa in questa
+  iterazione perché una top-20 nazionale finirebbe tutta in Piemonte e Valle
+  d'Aosta. Reintrodurla per macro-area renderebbe la mappa utile anche a chi
+  guarda da sud; serve `italy-latest.osm.pbf` (~2 GB) e riattivare
+  `05_access.py`, il cui codice è già lì.
+- **Heatmap a tasselli anche per la visualizzazione**, non solo per i dati:
+  oggi lo zoom sulle Alpi mostra un colore a 600 m sopra un dato a 250 m.
+  Tasselli XYZ generati a 180 m eliminerebbero lo scarto, al costo di
+  migliaia di file e ~200–300 MB nel deploy statico.
+- **DEM ad alta risoluzione** (5 m, dove disponibile dai geoportali
+  regionali) applicato *solo* a punti d'interesse specifici, per raffinare gli
+  ultimi metri attorno alle creste dov'è più facile che la griglia a 180 m
+  sbagli di qualche punto percentuale.
 
 ---
 
@@ -466,7 +645,7 @@ dopo il fix, che ha spostato l'osservatore sulla cella più alta del blocco
 | Dato | Fonte | Licenza |
 |---|---|---|
 | DEM | Copernicus DEM GLO-90, ESA / AWS Open Data | gratuita, attribuzione consigliata |
-| Rete stradale | OpenStreetMap, estratto Geofabrik nord-ovest | ODbL — attribuzione richiesta (presente nel footer della mappa) |
+| Rete stradale | OpenStreetMap, estratto Geofabrik nord-ovest — **non usata dalla mappa nazionale**, vedi §4 | ODbL — attribuzione richiesta (presente nel footer della mappa) |
 | Efemeridi | `astronomy-engine` (Don Cross, MIT) | MIT |
 | Tile di base | OpenStreetMap standard tile server | uso per sviluppo; per produzione ad alto traffico servirebbe un provider dedicato (es. MapTiler, Stadia) per rispettare la tile usage policy di OSM |
 | Geocoding (ricerca comune) | Nominatim, OpenStreetMap | uso per sviluppo/basso volume; per produzione ad alto traffico servirebbe un'istanza propria o un provider a pagamento, per rispettare la usage policy di Nominatim |
@@ -488,4 +667,18 @@ Per ripubblicare dopo una modifica al sito o ai dati:
 ```bash
 rsync -az --delete web/public/ hp-ubuntu:/srv/apps/eclisse/public/
 ssh hp-ubuntu 'docker restart eclisse-site'
+```
+
+**Prima del deploy: alzare `ASSET_V` in `index.html`.** Cloudflare mette in
+cache i file statici ma non l'HTML. Senza versione nell'URL, dopo un deploy il
+browser riceve l'`index.html` nuovo insieme allo `score.png` vecchio ancora in
+cache — verificato in produzione: il CDN ha continuato a servire la heatmap
+regionale (3.056.892 B) per un'ora dopo che l'origine aveva già quella
+nazionale (5.222.331 B), e il risultato sarebbe stata la mappa sbagliata
+stirata sui nuovi angoli. `meta.json`, `score.png` e i tasselli sono richiesti
+con `?v=ASSET_V`, quindi basta cambiare quella costante perché il CDN veda
+URL nuovi. Verifica dopo il deploy:
+
+```bash
+curl -s -o /dev/null -w '%{http_code} %{size_download}B\n' https://eclisse.tongatron.org/data/score.png?v=$(grep -o "ASSET_V = '[^']*'" web/public/index.html | cut -d"'" -f2)
 ```

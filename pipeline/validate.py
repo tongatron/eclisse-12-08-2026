@@ -39,8 +39,24 @@ SITES = [
     ("Mondovi", 44.3956, 7.8164, "pedemontana sud"),
     ("Cuneo", 44.3841, 7.5426, "pianura sotto le Marittime"),
     ("Biella", 45.5628, 8.0583, "pedemontana nord"),
-    ("Bardonecchia", 45.0797, 6.6997, "fondovalle alpino"),
-    ("Stresa (Maggiore)", 45.8850, 8.5300, "lago, monti a ovest"),
+    ("Bardonecchia", 45.0797, 6.6997, "fondovalle alpino chiuso: coperto"),
+    ("Stresa (Maggiore)", 45.8850, 8.5300, "Mottarone a ovest: coperto"),
+    # Da qui in giu': controllo del gradiente nazionale. Fuori dal nord non e'
+    # piu' l'orografia a decidere ma l'ora del tramonto, quindi l'ordine
+    # atteso segue la geografia e non l'altezza delle montagne. Le voci nuove
+    # stanno in fondo apposta, cosi' IDX_TORINO resta valido.
+    ("Bolzano", 46.4983, 11.3548, "nord-est, conca fra i monti"),
+    ("Trieste", 45.6495, 13.7768, "nord-est estremo, mare a ovest"),
+    ("Genova", 44.4056, 8.9463, "costa ligure, monti alle spalle"),
+    ("Gran Sasso", 42.4500, 13.5667, "sul fianco sotto il Corno Grande: coperto"),
+    ("Roma", 41.9028, 12.4964, "centro, Sole quasi al tramonto"),
+    ("Cagliari", 39.2238, 9.1217, "citta' bassa, colli a WNW: coperto"),
+    ("Napoli", 40.8518, 14.2681, "sud, tramonta prima del massimo"),
+    ("Bari", 41.1171, 16.8719, "Adriatico, tramonto anticipato"),
+    ("Lecce", 40.3515, 18.1750, "Salento: il minimo nazionale atteso"),
+    ("Palermo", 38.1157, 13.3615, "Sicilia nord"),
+    ("Etna (cima)", 37.7510, 14.9934, "quota massima del sud"),
+    ("Lampedusa", 35.5000, 12.6000, "estremo sud, orizzonte tutto marino"),
 ]
 IDX_TORINO = 5
 
