@@ -207,7 +207,8 @@
        schermo. Quando il risultato e' lungo, scorre senza coprire la mappa. */
     :root{--radar-panel-h:46dvh}
     #side{inset:0 0 auto;width:auto;height:var(--radar-panel-h);padding:max(10px,env(safe-area-inset-top)) 10px 10px;
-      background:linear-gradient(to bottom,rgba(13,17,23,.42),rgba(13,17,23,0));}
+      background:linear-gradient(to bottom,rgba(13,17,23,.42),rgba(13,17,23,0));
+      pointer-events:auto;touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
     #map{inset:var(--radar-panel-h) 0 0}
     .radar-heading{padding:9px 11px}.radar-heading .sub:last-child{display:none}
     .radar-search-actions .btn-locate{font-size:13px;padding:8px 10px}
