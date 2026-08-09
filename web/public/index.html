@@ -127,7 +127,8 @@
   .btn-play:focus-visible{outline:2px solid #58a6ff;outline-offset:2px}
   .btn-play:disabled{opacity:.4;cursor:default;background:#21262d;border-color:var(--line);color:var(--txt);box-shadow:none}
   .btn-locate{width:100%;display:flex;align-items:center;justify-content:center;gap:7px}
-  .geo-status{min-height:17px;margin-top:7px}
+  .geo-status{margin-top:7px}
+  .geo-status:empty{display:none}
   footer{border-top:1px solid var(--line);margin:18px -16px -16px;padding:12px 16px 18px;
     color:var(--dim);font-size:11px}
   footer a{color:var(--acc);text-decoration:none}
@@ -188,7 +189,7 @@
 
   <div class="card">
     <h2>Cerca comune</h2>
-    <input type="text" id="q-comune" autocomplete="off" aria-label="Cerca un comune italiano" placeholder="Es. Alghero">
+    <input type="text" id="q-comune" autocomplete="off" aria-label="Cerca un comune italiano">
     <div id="q-results"></div>
     <button id="locate-me" class="btn-play btn-locate" type="button" style="margin-top:10px">⌖ Usa la mia posizione</button>
     <div id="geo-status" class="hint geo-status" role="status" aria-live="polite"></div>
