@@ -348,7 +348,7 @@
 <div id="map"></div>
 <button id="panel-toggle" type="button" aria-controls="side" aria-expanded="false">
   <span id="panel-toggle-icon" aria-hidden="true">⌄</span>
-  <span id="panel-toggle-text">Cerca un luogo</span>
+  <span id="panel-toggle-text">Apri dettagli</span>
 </button>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -371,7 +371,7 @@ if('serviceWorker' in navigator){
 // l'HTML: dopo un deploy il browser riceveva index.html aggiornato insieme a
 // score.png vecchio di un'ora, cioe' la heatmap sbagliata stirata sui nuovi
 // angoli. Da alzare a ogni rigenerazione della pipeline.
-const ASSET_V = '20260809c';
+const ASSET_V = '20260809d';
 const v = url => url + (url.includes('?') ? '&' : '?') + 'v=' + ASSET_V;
 
 // L'elenco e' incluso nel deploy statico: la ricerca non invia cio' che
@@ -809,7 +809,7 @@ function setPanel(open){
   document.body.classList.toggle('mobile-panel-closed', mobile && !open);
   panelToggle.setAttribute('aria-expanded', String(open));
   $('#panel-toggle-icon').textContent = open ? '⌃' : '⌄';
-  $('#panel-toggle-text').textContent = open ? 'Nascondi ricerca' : 'Cerca un luogo';
+  $('#panel-toggle-text').textContent = open ? 'Chiudi dettagli' : 'Apri dettagli';
   // Il contenitore cambia altezza: senza resize il canvas resta della misura
   // vecchia e la mappa appare tagliata o schiacciata.
   scheduleMobilePanelFit();

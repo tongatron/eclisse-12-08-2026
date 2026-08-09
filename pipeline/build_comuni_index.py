@@ -46,6 +46,12 @@ BOUNDARIES_REFERENCE_DATE = "2026-01-01"
 # la media dei loro centroidi resta all'interno del nuovo comune ed evita di
 # escluderlo dalla ricerca fino alla prossima edizione dei confini.
 RECENT_MERGES = {"024129": ("024027", "024071")}  # Castegnero + Nanto
+# Coordinate specificate per casi in cui il punto di riferimento desiderato
+# non coincide con la sede municipale pubblicata dal dataset di base.
+# Valori: codice ISTAT -> (longitudine, latitudine), WGS84.
+MUNICIPAL_CENTRE_OVERRIDES = {
+    "096004": (8.0549281, 45.5657631),  # Biella — Caffè Magnino
+}
 NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
 
 
@@ -300,6 +306,10 @@ def main() -> int:
                               if candidate in municipal_centres]
                 if len(candidates) == 1:
                     municipal_centres[code] = municipal_centres[candidates[0]]
+    for code, coordinates in MUNICIPAL_CENTRE_OVERRIDES.items():
+        if code not in codes:
+            raise SystemExit(f"Override coordinate per un comune ISTAT assente: {code}")
+        municipal_centres[code] = coordinates
 
     comuni = []
     centres_used = 0
@@ -323,6 +333,7 @@ def main() -> int:
             "coordinate_method": "sede municipale" if centres_used else "centro geometrico del confine",
             "municipal_centres_used": centres_used,
             "boundary_centroids_used": len(comuni) - centres_used,
+            "manual_coordinate_overrides": sorted(MUNICIPAL_CENTRE_OVERRIDES),
         },
         "comuni": comuni,
     }
