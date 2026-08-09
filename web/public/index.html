@@ -204,6 +204,17 @@
     border:1px solid var(--line);border-radius:5px;background:#21262d;color:var(--txt);font:20px/1 system-ui;cursor:pointer}
   body.embedded .sim-close:hover{background:#30363d}
 
+  /* Su desktop il pannello ha spazio verticale e larghezza sufficienti per
+     una lettura piu' comoda; su mobile restano le misure compatte. */
+  @media (min-width:769px){
+    .radar-heading h1{font-size:20px}
+    .sub{font-size:13px}
+    .card h2{font-size:13px}
+    .hint{font-size:13px;line-height:1.55}
+    .calculation-link{font-size:13px}
+    .lab{font-size:12px}
+  }
+
   @media (max-width: 768px){
     html,body{height:100dvh;min-height:100dvh;overflow:hidden}
     /* Il pannello occupa solo l'altezza dei suoi contenuti, fino al 46% dello
@@ -314,14 +325,10 @@
       <h2>Scala</h2>
       <div class="legend" id="legend"></div>
       <div class="lab"><span>0%</span><span>50%</span><span>75%</span><span>95%</span></div>
-      <div class="hint" style="margin-top:8px">Il massimo italiano è in <b>Sardegna nord-occidentale</b>,
-        ~<b>98%</b> fra Stintino e Alghero: la fascia di totalità finisce al tramonto poco al largo, a
-        ovest dell'isola. Poi ~94% nelle Alpi occidentali, ~81% al Centro, ~20% fra Calabria, Sicilia
-        e Salento, dove il Sole tramonta molto prima del culmine.
-        <br><br>
-        Il rosso non è poco oscuramento in sé: è il Sole già scomparso, sotto l'orizzonte o dietro
-        un rilievo. In Sardegna il Sole è a <i>0,1° di altezza</i> nel momento migliore, quindi
-        mezzo grado di collina costa dieci punti: conviene un orizzonte marino libero.</div>
+      <div class="hint" style="margin-top:8px">Il massimo è nel nord-ovest della <b>Sardegna</b> (~<b>98%</b>),
+        poi nelle Alpi occidentali (~94%) e al Centro (~81%). Nel Sud il Sole tramonta prima del culmine.
+        <br><br>Il rosso segnala Sole sotto l'orizzonte o coperto da rilievi: in Sardegna conviene un
+        orizzonte marino libero.</div>
     </div>
 
     <div class="card">
