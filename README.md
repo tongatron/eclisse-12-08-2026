@@ -35,8 +35,9 @@ Il sito è completamente statico: i raster sono calcolati offline a partire
 dal DEM Copernicus e pubblicati con GitHub Pages. Non raccoglie dati personali
 né richiede un backend.
 
-Per calcoli, struttura dei dati, pipeline, validazione e limiti noti, consulta
-[la documentazione tecnica](TECHNICAL.md).
+Per calcoli, struttura dei dati, validazione e limiti noti, consulta la
+[documentazione tecnica](TECHNICAL.md). Per installare, eseguire o rigenerare
+gli asset, consulta la [guida della pipeline](pipeline/README.md).
 
 ## Pubblicazione e aggiornamenti
 
@@ -46,7 +47,7 @@ interazioni sulla mappa.
 
 Per aggiornare i dati:
 
-1. esegui la pipeline descritta in [TECHNICAL.md](TECHNICAL.md);
+1. esegui la [pipeline di elaborazione](pipeline/README.md);
 2. aggiorna `ASSET_V` in `web/public/index.html` quando cambiano gli asset;
 3. fai commit e push su `master`.
 
