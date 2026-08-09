@@ -203,8 +203,8 @@
 
   @media (max-width: 768px){
     html,body{height:100%;overflow:hidden}
-    /* Il risultato puo' essere lungo (dati, simulazione e licenze), ma non
-       deve mai coprire la mappa: scorre solo il pannello superiore. */
+    /* Il pannello occupa solo l'altezza dei suoi contenuti, fino al 46% dello
+       schermo. Quando il risultato e' lungo, scorre senza coprire la mappa. */
     :root{--radar-panel-h:46dvh}
     #side{inset:0 0 auto;width:auto;height:var(--radar-panel-h);padding:max(10px,env(safe-area-inset-top)) 10px 10px;
       background:linear-gradient(to bottom,rgba(13,17,23,.42),rgba(13,17,23,0));}
@@ -411,6 +411,37 @@ const map = new maplibregl.Map({
 });
 map.addControl(new maplibregl.NavigationControl({showCompass:false}), 'top-right');
 
+// Su telefono, all'apertura il pannello contiene solo titolo e ricerca: una
+// quota fissa del 46% lasciava sotto di essi un grande spazio vuoto. L'altezza
+// segue quindi il contenuto, con il 46% come limite quando compaiono risultato
+// e simulazione; la parte eccedente scorre nel pannello.
+const mobilePanelMedia = window.matchMedia('(max-width: 768px)');
+const mobileSide = $('#side');
+let mobilePanelFrame = 0;
+function fitMobilePanel(){
+  mobilePanelFrame = 0;
+  if(EMBEDDED || !mobilePanelMedia.matches){
+    document.documentElement.style.removeProperty('--radar-panel-h');
+    return;
+  }
+  const maxHeight = Math.floor(window.innerHeight * 0.46);
+  const contentHeight = Math.ceil(mobileSide.scrollHeight);
+  document.documentElement.style.setProperty('--radar-panel-h', Math.min(maxHeight, contentHeight) + 'px');
+  map.resize();
+}
+function scheduleMobilePanelFit(){
+  if(!mobilePanelFrame) mobilePanelFrame = requestAnimationFrame(fitMobilePanel);
+}
+mobilePanelMedia.addEventListener('change', scheduleMobilePanelFit);
+window.addEventListener('resize', scheduleMobilePanelFit);
+new MutationObserver(scheduleMobilePanelFit).observe(mobileSide, {
+  childList:true, subtree:true
+});
+new MutationObserver(scheduleMobilePanelFit).observe(document.body, {
+  attributes:true, attributeFilter:['class']
+});
+scheduleMobilePanelFit();
+
 let META=null, TILES=null;
 
 // addSource fallisce se lo style non e' ancora caricato: va atteso come gli altri.
@@ -604,6 +635,7 @@ function showNoData(ll){
   $('#sel-empty').style.display='block';
   $('#sel-empty').textContent =
     'Nessun dato calcolato qui: il punto è in mare o fuori dal territorio italiano.';
+  scheduleMobilePanelFit();
   showPopup(ll).setHTML('<span style="color:#8b98a8">fuori area calcolata</span>');
 }
 
@@ -636,6 +668,7 @@ function resetSelection(){
   url.searchParams.delete('lat');
   url.searchParams.delete('lon');
   history.replaceState(null, '', url);
+  scheduleMobilePanelFit();
 }
 
 function showPopup(ll){
@@ -723,6 +756,7 @@ async function inspect(ll, {updateUrl=true}={}){
 
   const col = mai ? '#e07a4a' : obsc>=88?'#4ade80':obsc>=60?'#e1be3c':'#e07a4a';
   updateSim(ll[1], ll[0], hor, mai);
+  scheduleMobilePanelFit();
   showPopup(ll)
     .setHTML('<b style="color:'+col+'">'+(mai ? '0.0' : obsc.toFixed(1))+'%</b> di oscuramento visibile'+
       '<br><span style="color:#8b98a8">Istante migliore: '+$('#v-time').textContent+'</span>'+
@@ -930,6 +964,7 @@ $('#sim-play').onclick = () => { simPlayTimer ? stopPlay() : startPlay(); };
 $('#sim-close').onclick = () => {
   stopPlay();
   $('#sim-card').style.display = 'none';
+  scheduleMobilePanelFit();
 };
 
 function scrubToIndex(idx){
