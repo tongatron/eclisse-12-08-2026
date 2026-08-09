@@ -203,11 +203,16 @@
 
   @media (max-width: 768px){
     html,body{height:100%;overflow:hidden}
-    #side{left:10px;top:max(10px,env(safe-area-inset-top));right:10px;bottom:10px;width:auto;padding:0 1px}
+    /* Il risultato puo' essere lungo (dati, simulazione e licenze), ma non
+       deve mai coprire la mappa: scorre solo il pannello superiore. */
+    :root{--radar-panel-h:46dvh}
+    #side{inset:0 0 auto;width:auto;height:var(--radar-panel-h);padding:max(10px,env(safe-area-inset-top)) 10px 10px;
+      background:linear-gradient(to bottom,rgba(13,17,23,.42),rgba(13,17,23,0));}
+    #map{inset:var(--radar-panel-h) 0 0}
     .radar-heading{padding:9px 11px}.radar-heading .sub:last-child{display:none}
     .radar-search-actions .btn-locate{font-size:13px;padding:8px 10px}
     #side .details-options,#side footer{display:none}
-    #side #sim-card{max-height:48dvh;overflow:auto}
+    #side #sim-card{max-height:none;overflow:visible}
 
     body.embedded #map{inset:52px 0 0}
     body.embedded #embed-header{padding:0 10px;gap:8px}
