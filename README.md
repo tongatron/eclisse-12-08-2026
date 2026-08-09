@@ -47,8 +47,8 @@ punto si ottengono oscuramento, orario, altezza del Sole e quota locale.
   simulazione compatta dell’eclisse, adattata alla larghezza di una colonna
   editoriale.
 - **Affidabilità verificabile**, con data dei dati, report della validazione,
-  campioni territoriali e limiti d'uso pubblicati nella
-  [pagina dedicata](https://eclisse-12-08-2026.tongatron.org/affidabilita.html).
+  campioni territoriali e limiti d'uso nella
+  [documentazione tecnica](TECHNICAL.md).
 
 ## Come funziona
 

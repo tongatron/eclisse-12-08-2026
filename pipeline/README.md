@@ -127,10 +127,12 @@ python pipeline/validate.py
 Il comando confronta il raster dell'orizzonte con un calcolo analitico
 indipendente e stampa una tabella di località di controllo. Scrive inoltre
 `web/public/data/validation.json`, mostrato nella pagina pubblica
-`affidabilita.html`: contiene data dei dati analizzati, data della verifica,
-parametri della griglia, esito del controllo Torino–Rocciamelone e tutti i
-campioni territoriali. Se il confronto analitico fallisce, il comando termina
-con errore e il report non deve essere pubblicato.
+`web/public/data/validation.json` contiene data dei dati analizzati, data della
+verifica, parametri della griglia, esito del controllo Torino–Rocciamelone e
+tutti i campioni territoriali; il formato e i limiti d'uso sono descritti nella
+[documentazione tecnica](../TECHNICAL.md#validazione). Se il confronto
+analitico fallisce, il comando termina con errore e il report non deve essere
+pubblicato.
 
 Prima del commit, verificare gli asset generati e incrementare `ASSET_V` in `web/public/index.html`. Il parametro di versione evita che browser e service worker combinino HTML nuovo con raster precedenti in cache. Infine versionare gli asset in `web/public/data/` e pubblicare su `master`; GitHub Pages serve quella cartella come sito statico.
 

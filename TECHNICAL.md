@@ -48,7 +48,6 @@ pipeline/                  calcolo offline in Python
 
 web/public/                sito statico pubblicato da GitHub Pages
   index.html               interfaccia MapLibre e lettura dei pixel
-  affidabilita.html        versione, validazione e limiti del dato
   data/score.png           heatmap nazionale a 600 m
   data/meta.json           griglia, bounding box e legenda
   data/tiles/              dati di dettaglio a 250 m
@@ -117,6 +116,22 @@ pubblicato da GitHub Pages.
 
 ## Validazione
 
+### Cosa misura e limiti d'uso
+
+Il valore pubblicato è la maggiore frazione dell'area del disco solare coperta
+dalla Luna in un istante in cui il Sole è sopra l'orizzonte astronomico e sopra
+quello modellato dal terreno. Descrive quindi la geometria dell'eclisse e della
+visibilità del Sole, non le condizioni di osservazione complessive.
+
+La mappa non valuta meteo, accessibilità, proprietà privata, sicurezza
+stradale, affollamento, vegetazione, edifici o altri ostacoli entro poche
+centinaia di metri. Il valore al clic usa tasselli a 250 m e il DEM ha
+risoluzione di 90 m: un rilievo, un albero o un edificio vicino possono cambiare
+la vista reale. Ogni luogo va verificato sul posto, scegliendo solo aree
+accessibili e sicure con orizzonte libero nella direzione del Sole.
+
+### Controlli riproducibili
+
 `pipeline/validate.py` esegue controlli su:
 
 - coerenza geometrica degli azimut e della convergenza dei meridiani;
@@ -124,12 +139,11 @@ pubblicato da GitHub Pages.
 - coordinate e orari dell'eclisse;
 - intervallo e coerenza delle bande raster esportate.
 
-Al termine scrive `web/public/data/validation.json`, che alimenta la pagina
-pubblica [Affidabilità del dato](web/public/affidabilita.html). Il report
-registra data dei dati analizzati, data della verifica, parametri della griglia,
-esito del confronto analitico Torino–Rocciamelone e i campioni territoriali.
-Il comando termina con errore se il controllo analitico non supera la tolleranza.
-Va eseguito dopo ogni rigenerazione dei dati e versionato insieme agli asset.
+Al termine scrive `web/public/data/validation.json`. Il report registra data
+dei dati analizzati, data della verifica, parametri della griglia, esito del
+confronto analitico Torino–Rocciamelone e campioni territoriali. Il comando
+termina con errore se il controllo analitico non supera la tolleranza. Va
+eseguito dopo ogni rigenerazione dei dati e versionato insieme agli asset.
 
 ## Frontend e cache
 
