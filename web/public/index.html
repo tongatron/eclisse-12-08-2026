@@ -2,7 +2,7 @@
 <html lang="it" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Eclisse 12 agosto 2026 — dove guardarla in Italia</title>
 <meta name="description" content="Mappa interattiva della visibilità reale dell'eclisse solare parziale del 12 agosto 2026 in Italia.">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
@@ -80,7 +80,7 @@
      scura, compatta e ad alto contrasto per tenere la mappa al centro. */
   :root{--bg:#0d1117;--panel:#161b22;--card:#0d1117;--line:#30363d;--line-soft:#21262d;--txt:#c9d1d9;--dim:#8b949e;--acc:#3fb950}
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
+  html,body{margin:0;width:100%;height:100%;min-height:100dvh;background:var(--bg);color:var(--txt);
     font:14px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
   /* Radar: la mappa e' il piano principale. Ricerca e risultato sono due
      superfici leggere sopra di essa, non una colonna che ne ruba un terzo. */
@@ -202,11 +202,11 @@
   body.embedded .sim-close:hover{background:#30363d}
 
   @media (max-width: 768px){
-    html,body{height:100%;overflow:hidden}
+    html,body{height:100dvh;min-height:100dvh;overflow:hidden}
     /* Il pannello occupa solo l'altezza dei suoi contenuti, fino al 46% dello
        schermo. Quando il risultato e' lungo, scorre senza coprire la mappa. */
     :root{--radar-panel-h:46dvh}
-    #side{inset:0 0 auto;width:auto;height:var(--radar-panel-h);padding:max(10px,env(safe-area-inset-top)) 10px 10px;
+    #side{inset:0 0 auto;width:auto;height:var(--radar-panel-h);padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) 10px max(10px,env(safe-area-inset-left));
       background:linear-gradient(to bottom,rgba(13,17,23,.42),rgba(13,17,23,0));
       pointer-events:auto;touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
     #map{inset:var(--radar-panel-h) 0 0}

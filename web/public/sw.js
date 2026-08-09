@@ -1,4 +1,4 @@
-const CACHE = 'punto-eclissi-shell-v2';
+const CACHE = 'punto-eclissi-shell-v3';
 const SHELL = [
   './',
   './manifest.webmanifest',
