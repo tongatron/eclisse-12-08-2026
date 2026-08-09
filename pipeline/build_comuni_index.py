@@ -2,27 +2,32 @@
 
 Input:
   - l'elenco ufficiale dei codici ISTAT (xlsx);
-  - i confini comunali ISTAT generalizzati (zip/shapefile).
+  - i confini comunali ISTAT generalizzati (zip/shapefile), usati come fallback;
+  - le coordinate delle sedi municipali (csv), usate quando disponibili.
 
 Output: web/public/data/comuni.json. Il browser non contatta servizi di
 geocoding: nomi, provincia e coordinate sono tutti inclusi nel deploy statico.
-Il solo centro geometrico e' sufficiente per portare la mappa nel comune; non
-e' una promessa di rappresentare il capoluogo o un punto panoramico.
+Il punto predefinito e' la sede municipale; il centro geometrico del confine e'
+usato soltanto come fallback. Non e' un punto panoramico consigliato.
 
 Esempio (dalla radice del repository):
 
     python pipeline/build_comuni_index.py \
       --codes-xlsx /percorso/Elenco-comuni-italiani.xlsx \
-      --boundaries-zip /percorso/Limiti01012026_g.zip
+      --boundaries-zip /percorso/Limiti01012026_g.zip \
+      --municipal-centres-csv /percorso/coordinate.csv \
+      --municipal-names-csv /percorso/comuni.csv
 """
 
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import math
 import struct
 import tempfile
+import unicodedata
 import xml.etree.ElementTree as ET
 import zipfile
 from collections import defaultdict
@@ -32,6 +37,8 @@ from config import WEB_PUBLIC
 
 ISTAT_CODES_URL = "https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.xlsx"
 ISTAT_BOUNDARIES_URL = "https://www.istat.it/storage/cartografia/confini_amministrativi/generalizzati/2026/Limiti01012026_g.zip"
+MUNICIPAL_CENTRES_URL = "https://raw.githubusercontent.com/opendatasicilia/comuni-italiani/main/dati/coordinate.csv"
+MUNICIPAL_NAMES_URL = "https://raw.githubusercontent.com/opendatasicilia/comuni-italiani/main/dati/comuni.csv"
 REFERENCE_DATE = "2026-02-21"
 BOUNDARIES_REFERENCE_DATE = "2026-01-01"
 # L'elenco dei codici e' aggiornato al 21 febbraio, mentre i confini 2026
@@ -84,6 +91,54 @@ def read_codes(path: Path) -> dict[str, tuple[str, str, str]]:
         code, official, italian, province = values[4], values[5], values[6], values[11]
         if code and italian and province:
             out[code.zfill(6)] = (italian, province, official)
+    return out
+
+
+def normalise_name(value: str) -> str:
+    """Chiave stabile per associare le denominazioni tra dataset diversi."""
+    folded = unicodedata.normalize("NFD", value.casefold())
+    return " ".join(
+        "".join(char for char in folded if not unicodedata.combining(char))
+        .replace("’", "'").split()
+    )
+
+
+def parse_coordinate(value: str, integer_digits: int) -> float:
+    """Interpreta coordinate decimali e le rare righe CSV prive del punto."""
+    text = value.strip()
+    if "." not in text and text.isdigit() and len(text) > integer_digits:
+        text = text[:integer_digits] + "." + text[integer_digits:]
+    return float(text)
+
+
+def read_municipal_centres(path: Path) -> dict[str, tuple[float, float]]:
+    """Legge le coordinate WGS84 delle sedi municipali, indicizzate per ISTAT."""
+    out = {}
+    with path.open(newline="", encoding="utf-8-sig") as fh:
+        for row in csv.DictReader(fh):
+            code = (row.get("pro_com_t") or "").strip().zfill(6)
+            try:
+                lat = parse_coordinate(row["lat"], 2)
+                # La longitudine italiana ha da una a due cifre intere; nel
+                # file le righe senza il separatore hanno sempre tre decimali.
+                lon = parse_coordinate(row["long"], max(1, len(row["long"].strip()) - 3))
+            except (KeyError, TypeError, ValueError):
+                continue
+            # Errore di colonna o di CRS: non pubblichiamo mai un punto
+            # palesemente fuori dall'Italia come centro di un comune.
+            if code and 35.0 <= lat <= 48.5 and 5.0 <= lon <= 20.0:
+                out[code] = (lon, lat)
+    return out
+
+
+def read_municipal_names(path: Path) -> dict[str, list[str]]:
+    """Indice nome -> codici per riallineare mutamenti dei codici ISTAT."""
+    out: dict[str, list[str]] = defaultdict(list)
+    with path.open(newline="", encoding="utf-8-sig") as fh:
+        for row in csv.DictReader(fh):
+            code, name = (row.get("pro_com_t") or "").strip(), row.get("comune") or ""
+            if code and name:
+                out[normalise_name(name)].append(code.zfill(6))
     return out
 
 
@@ -208,6 +263,14 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--codes-xlsx", type=Path, required=True)
     parser.add_argument("--boundaries-zip", type=Path, required=True)
+    parser.add_argument(
+        "--municipal-centres-csv", type=Path,
+        help="coordinate WGS84 delle sedi municipali (pro_com_t,lat,long)",
+    )
+    parser.add_argument(
+        "--municipal-names-csv", type=Path,
+        help="anagrafica dei comuni per riallineare eventuali codici ISTAT cambiati",
+    )
     parser.add_argument("--out", type=Path, default=WEB_PUBLIC / "comuni.json")
     args = parser.parse_args()
 
@@ -223,27 +286,52 @@ def main() -> int:
     if missing:
         raise SystemExit(f"Mancano {len(missing)} centroidi ISTAT: {', '.join(missing[:5])}")
 
+    municipal_centres: dict[str, tuple[float, float]] = {}
+    if args.municipal_centres_csv:
+        municipal_centres = read_municipal_centres(args.municipal_centres_csv)
+        if args.municipal_names_csv:
+            names = read_municipal_names(args.municipal_names_csv)
+            for code, (name, _, _) in codes.items():
+                if code in municipal_centres:
+                    continue
+                # Nel 2026 la Sardegna ha aggiornato vari codici ISTAT: il
+                # nome univoco conserva l'abbinamento alla sede municipale.
+                candidates = [candidate for candidate in names.get(normalise_name(name), [])
+                              if candidate in municipal_centres]
+                if len(candidates) == 1:
+                    municipal_centres[code] = municipal_centres[candidates[0]]
+
     comuni = []
+    centres_used = 0
     for code, (name, province, official) in sorted(codes.items(), key=lambda item: item[1][:2]):
-        lon, lat = centroids[code]
+        lon, lat = municipal_centres.get(code, centroids[code])
+        centres_used += code in municipal_centres
         # L'alias conserva le denominazioni bilingui, ma non duplica il nome.
         alias = official if official and official != name else ""
         comuni.append([name, province, round(lat, 5), round(lon, 5), alias])
 
     payload = {
-        "schema": 1,
+        "schema": 2,
         "source": {
-            "name": "ISTAT — Codici e confini delle unità amministrative",
+            "name": "ISTAT — Codici e confini delle unità amministrative; OpenDataSicilia — sedi municipali",
             "reference_date": REFERENCE_DATE,
             "boundaries_reference_date": BOUNDARIES_REFERENCE_DATE,
             "codes_url": ISTAT_CODES_URL,
             "boundaries_url": ISTAT_BOUNDARIES_URL,
+            "municipal_centres_url": MUNICIPAL_CENTRES_URL if args.municipal_centres_csv else None,
+            "municipal_names_url": MUNICIPAL_NAMES_URL if args.municipal_names_csv else None,
+            "coordinate_method": "sede municipale" if centres_used else "centro geometrico del confine",
+            "municipal_centres_used": centres_used,
+            "boundary_centroids_used": len(comuni) - centres_used,
         },
         "comuni": comuni,
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n")
-    print(f"Scritto {args.out}: {len(comuni)} comuni")
+    print(
+        f"Scritto {args.out}: {len(comuni)} comuni "
+        f"({centres_used} sedi municipali, {len(comuni) - centres_used} fallback geometrici)"
+    )
     return 0
 
 

@@ -362,12 +362,13 @@ if('serviceWorker' in navigator){
 // l'HTML: dopo un deploy il browser riceveva index.html aggiornato insieme a
 // score.png vecchio di un'ora, cioe' la heatmap sbagliata stirata sui nuovi
 // angoli. Da alzare a ogni rigenerazione della pipeline.
-const ASSET_V = '20260809b';
+const ASSET_V = '20260809c';
 const v = url => url + (url.includes('?') ? '&' : '?') + 'v=' + ASSET_V;
 
 // L'elenco e' incluso nel deploy statico: la ricerca non invia cio' che
 // l'utente scrive a servizi di geocoding esterni. Viene generato dagli
-// elenchi e confini ISTAT (pipeline/build_comuni_index.py).
+// elenchi ISTAT e dalle coordinate delle sedi municipali
+// (pipeline/build_comuni_index.py).
 function normaliseComune(value){
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLocaleLowerCase('it').replace(/[’']/g, '').replace(/[^a-z0-9]+/g, ' ').trim();

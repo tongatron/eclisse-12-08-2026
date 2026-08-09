@@ -51,7 +51,7 @@ web/public/                sito statico pubblicato da GitHub Pages
   data/score.png           heatmap nazionale a 600 m
   data/meta.json           griglia, bounding box e legenda
   data/tiles/              dati di dettaglio a 250 m
-  data/comuni.json         indice locale dei 7.894 comuni per la ricerca
+  data/comuni.json         indice locale dei 7.894 comuni e delle sedi municipali
   data/validation.json     esito e campioni dell'ultima validazione
 ```
 
@@ -150,9 +150,10 @@ eseguito dopo ogni rigenerazione dei dati e versionato insieme agli asset.
 `web/public/index.html` usa MapLibre GL per la mappa, un indice locale ISTAT
 per la ricerca dei comuni e tile di base OpenStreetMap. La ricerca non invia il
 testo digitato a servizi di geocoding esterni. `data/comuni.json` contiene
-nome, provincia, eventuale denominazione bilingue e centro geometrico del
-comune; è generato da `pipeline/build_comuni_index.py` a partire dai codici e
-dai confini ISTAT.
+nome, provincia, eventuale denominazione bilingue e coordinate della sede
+municipale; è generato da `pipeline/build_comuni_index.py` a partire dai codici
+e confini ISTAT e da un dataset delle sedi comunali. Per i rari comuni nuovi
+non ancora presenti in quel dataset usa il centro geometrico del confine.
 
 Le risorse dati sono richieste con un parametro `?v=ASSET_V`: quando si
 rigenerano raster, tasselli o indice dei comuni, incrementare quella costante

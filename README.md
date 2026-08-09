@@ -38,8 +38,8 @@ punto si ottengono oscuramento, orario, altezza del Sole e quota locale.
 - **Simulazione nel tempo** dell'eclisse nel punto selezionato, con distinzione
   fra Sole visibile, tramonto e orizzonte ostruito dai rilievi.
 - **Ricerca di tutti i comuni italiani**, locale e istantanea: l'indice ISTAT
-  include province e denominazioni bilingui, senza inviare ciò che si digita a
-  servizi di geocoding esterni.
+  include province e denominazioni bilingui e porta alla sede municipale, senza
+  inviare ciò che si digita a servizi di geocoding esterni.
 - **Geolocalizzazione su richiesta**, condivisibile solo se l'utente lo sceglie.
 - **Esperienza mobile e PWA**, con pannello richiudibile per lasciare la mappa
   a tutto schermo.

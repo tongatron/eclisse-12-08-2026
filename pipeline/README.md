@@ -99,22 +99,28 @@ L'export elimina e ricrea i PNG presenti in `web/public/data/tiles/`. Prima di e
 ### 7. Aggiornare l'indice locale dei comuni
 
 La ricerca sul sito non usa servizi di geocoding esterni. `comuni.json` contiene
-nome, provincia, eventuale denominazione bilingue e centro geometrico di tutti i
-comuni; è generato dai [codici ISTAT](https://www.istat.it/classificazione/codici-dei-comuni-delle-province-e-delle-regioni/)
-e dai [confini amministrativi ISTAT](https://www.istat.it/notizia/confini-delle-unita-amministrative-a-fini-statistici-al-1-gennaio-2018-2/).
+nome, provincia, eventuale denominazione bilingue e la coordinata della sede
+municipale; è generato dai [codici ISTAT](https://www.istat.it/classificazione/codici-dei-comuni-delle-province-e-delle-regioni/),
+dai confini amministrativi ISTAT e dal dataset open source delle sedi municipali
+[OpenDataSicilia](https://github.com/opendatasicilia/comuni-italiani/tree/main/dati).
 
-Aggiornare l'indice solo quando ISTAT pubblica una nuova edizione di uno dei due
-file. Lo script usa esclusivamente la libreria standard di Python:
+Aggiornare l'indice quando ISTAT pubblica una nuova edizione dei codici o dei
+confini, oppure quando viene aggiornato il dataset delle sedi. Lo script usa
+esclusivamente la libreria standard di Python:
 
 ```bash
 python pipeline/build_comuni_index.py \
   --codes-xlsx /percorso/Elenco-comuni-italiani.xlsx \
-  --boundaries-zip /percorso/Limiti01012026_g.zip
+  --boundaries-zip /percorso/Limiti01012026_g.zip \
+  --municipal-centres-csv /percorso/coordinate.csv \
+  --municipal-names-csv /percorso/comuni.csv
 ```
 
-Il centro geometrico serve a posizionare la mappa nel comune, non identifica un
-capoluogo né un punto consigliato per l'osservazione. Dopo l'aggiornamento,
-controllare il numero dei comuni stampato dallo script e incrementare `ASSET_V`.
+La sede municipale serve a posizionare la mappa nel centro amministrativo, non
+identifica un punto consigliato per l'osservazione. Il centro geometrico resta
+un fallback per i comuni di nuova istituzione non ancora presenti nel dataset.
+Dopo l'aggiornamento, controllare il numero dei comuni stampato dallo script e
+incrementare `ASSET_V`.
 
 ## Validazione e pubblicazione
 
