@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it">
+<html lang="it" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -21,14 +21,17 @@
 <meta property="og:title" content="Punto Eclisse — Eclisse solare del 12 agosto 2026 in Italia">
 <meta property="og:description" content="Scopri dove e quanto sarà visibile l'eclisse solare, tenendo conto dell'orizzonte reale.">
 <meta property="og:url" content="https://eclisse-12-08-2026.tongatron.org/">
-<meta property="og:image" content="https://eclisse-12-08-2026.tongatron.org/ecli.png">
+<meta property="og:image" content="https://eclisse-12-08-2026.tongatron.org/ecli.png?v=20260809">
+<meta property="og:image:secure_url" content="https://eclisse-12-08-2026.tongatron.org/ecli.png?v=20260809">
+<meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1536">
 <meta property="og:image:height" content="1024">
 <meta property="og:image:alt" content="Mappa della visibilità dell'eclisse solare del 12 agosto 2026 in Italia">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Punto Eclisse — 12 agosto 2026">
 <meta name="twitter:description" content="Mappa interattiva della visibilità dell'eclisse solare in Italia.">
-<meta name="twitter:image" content="https://eclisse-12-08-2026.tongatron.org/ecli.png">
+<meta name="twitter:url" content="https://eclisse-12-08-2026.tongatron.org/">
+<meta name="twitter:image" content="https://eclisse-12-08-2026.tongatron.org/ecli.png?v=20260809">
 <meta name="twitter:image:alt" content="Mappa della visibilità dell'eclisse solare del 12 agosto 2026 in Italia">
 <script type="application/ld+json">
 {
@@ -79,12 +82,19 @@
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
     font:14px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  #map{position:absolute;inset:0 0 0 340px}
-  #side{position:absolute;left:0;top:0;bottom:0;width:340px;overflow-y:auto;
-    background:var(--panel);border-right:1px solid var(--line);padding:16px}
-  h1{font-size:18px;letter-spacing:-.02em;margin:0 0 2px}
+  /* Radar: la mappa e' il piano principale. Ricerca e risultato sono due
+     superfici leggere sopra di essa, non una colonna che ne ruba un terzo. */
+  #map{position:absolute;inset:0}
+  #side{position:absolute;z-index:5;left:18px;top:18px;bottom:18px;width:368px;overflow-y:auto;
+    padding:0 2px;background:transparent;border:0;pointer-events:none;scrollbar-width:thin}
+  #side > *{pointer-events:auto}
+  .radar-heading{margin-bottom:10px;padding:10px 12px;background:rgba(9,15,25,.95);border:1px solid rgba(88,101,114,.82);
+    border-radius:12px;box-shadow:0 12px 28px rgba(0,0,0,.34);backdrop-filter:blur(12px)}
+  .radar-kicker{color:var(--acc);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+  h1{font-size:18px;letter-spacing:-.02em;margin:0 0 2px;color:#f0f6fc}
   .sub{color:var(--dim);font-size:12px;margin-bottom:14px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px;margin-bottom:12px}
+  .card{background:rgba(13,17,23,.94);border:1px solid rgba(88,101,114,.82);border-radius:12px;padding:12px;margin-bottom:10px;
+    box-shadow:0 12px 28px rgba(0,0,0,.34);backdrop-filter:blur(12px)}
   .card h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin:0 0 8px}
   .kv{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--line-soft)}
   .kv:last-child{border-bottom:0}
@@ -115,10 +125,19 @@
     border-radius:5px;cursor:pointer;font:13px/1.35 system-ui;text-align:left}
   .q-item:hover{background:#1f6feb;color:#fff}
   .q-loading{color:var(--dim);font-size:12px;padding:4px 2px}
+  .radar-search{padding:11px}.radar-search h2{display:none}
+  .radar-search-actions{display:flex;gap:8px;margin-top:8px}
+  .radar-search-actions .btn-locate{width:auto;flex:1;margin:0!important}
+  .radar-selection{display:none}
+  body.has-selection .radar-selection{display:block}
   .gmaps-link{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;
     color:var(--acc);text-decoration:none}
   .gmaps-link:hover{text-decoration:underline}
   #sim-chart{width:100%;height:120px;display:block;cursor:crosshair;touch-action:none}
+  .sim-legend{display:flex;flex-wrap:wrap;gap:5px 10px;margin:4px 0 2px;color:var(--dim);font-size:10px}
+  .sim-legend span{display:inline-flex;align-items:center;gap:4px}.sim-legend i{width:14px;height:3px;border-radius:3px;background:#4ade80}
+  .sim-legend .sim-hidden{background:#e07a4a}.sim-legend .sim-theory{height:0;background:none;border-top:2px dashed #8b98a8}
+  .sim-legend .sim-peak{width:8px;height:8px;border-radius:50%;background:#f4b942}
   #sim-disc{flex:none;background:#0b0f15;border-radius:50%;border:1px solid var(--line)}
   #sim-status{margin-top:2px}
   .btn-play{background:var(--acc);border:1px solid #2ea043;color:#0d1117;border-radius:6px;
@@ -130,7 +149,7 @@
   .btn-locate{width:100%;display:flex;align-items:center;justify-content:center;gap:7px}
   .geo-status{margin-top:7px}
   .geo-status:empty{display:none}
-  footer{border-top:1px solid var(--line);margin:18px -16px -16px;padding:12px 16px 18px;
+  footer{border-top:1px solid var(--line);margin:12px 0 0;padding:12px 4px 18px;
     color:var(--dim);font-size:11px}
   footer a{color:var(--acc);text-decoration:none}
   footer a:hover{text-decoration:underline}
@@ -139,14 +158,13 @@
   footer summary{cursor:pointer;color:var(--txt)}
   footer details p{margin:7px 0 0}
   .details-options{margin-bottom:12px}
-  .details-options summary{cursor:pointer;background:var(--card);border:1px solid var(--line);
+  .details-options summary{cursor:pointer;background:rgba(13,17,23,.94);border:1px solid var(--line);
     border-radius:6px;padding:10px 11px;color:var(--txt);font-size:12px;font-weight:600}
   .details-options[open] summary{margin-bottom:10px}
   .details-options .card:last-child{margin-bottom:0}
 
-  /* Maniglia mobile: la regola sta fuori dal media query perche' il pulsante
-     esiste sempre nel DOM (nascosto da desktop) e il suo listener si registra
-     una volta sola, senza dipendere dal viewport corrente. */
+  /* Radar non usa una maniglia: anche su telefono la mappa resta disponibile
+     dietro i pannelli compatti. */
   #panel-toggle{display:none}
 
   /* Versione pensata per essere inclusa in un articolo: con circa 760 px di
@@ -183,29 +201,12 @@
   body.embedded .sim-close:hover{background:#30363d}
 
   @media (max-width: 768px){
-    /* Niente scroll di documento: scorre il pannello, non la pagina. Con il
-       body scrollabile il trascinamento sulla mappa muoveva la pagina. */
     html,body{height:100%;overflow:hidden}
-    /* dvh e non vh: su iOS la barra degli indirizzi che si ritrae cambia vh e
-       lascerebbe la mappa tagliata sotto il bordo dello schermo. */
-    :root{--side-h:46dvh}
-    #side{width:100%;height:var(--side-h);bottom:auto;
-      border-right:none;border-bottom:1px solid var(--line);padding-bottom:26px}
-    #map{inset:var(--side-h) 0 0 0}
-
-    #panel-toggle{display:flex;align-items:center;gap:6px;position:fixed;z-index:20;
-      left:50%;transform:translateX(-50%);top:calc(var(--side-h) - 15px);
-      background:var(--panel);border:1px solid var(--line);border-radius:999px;
-      color:var(--txt);font:12px/1 system-ui;padding:8px 15px;cursor:pointer;
-      box-shadow:0 2px 10px rgba(0,0,0,.45)}
-    #panel-toggle:active{background:#30363d}
-
-    body.map-full #side{display:none}
-    body.map-full #map{inset:0}
-    body.map-full #panel-toggle{top:max(10px,env(safe-area-inset-top))}
-    /* A pannello chiuso i controlli di MapLibre finirebbero sotto la maniglia
-       centrata in alto: vanno spostati piu' in basso. */
-    body.map-full .maplibregl-ctrl-top-right{margin-top:40px}
+    #side{left:10px;top:max(10px,env(safe-area-inset-top));right:10px;bottom:10px;width:auto;padding:0 1px}
+    .radar-heading{padding:9px 11px}.radar-heading .sub:last-child{display:none}
+    .radar-search-actions .btn-locate{font-size:13px;padding:8px 10px}
+    #side .details-options,#side footer{display:none}
+    #side #sim-card{max-height:48dvh;overflow:auto}
 
     body.embedded #map{inset:52px 0 0}
     body.embedded #embed-header{padding:0 10px;gap:8px}
@@ -214,33 +215,32 @@
     body.embedded #sim-card.sim-right{left:auto;right:10px}
   }
 
-  /* Telefono in orizzontale: 46dvh di pannello lascerebbero una striscia di
-     mappa inutilizzabile, quindi il pannello parte gia' chiuso (vedi JS). */
-  @media (max-width: 768px) and (max-height: 460px){
-    :root{--side-h:64dvh}
-  }
 </style>
 </head>
-<body>
+<body class="radar-ui">
 <div id="embed-header" aria-label="Mappa incorporata">
   <div><span class="embed-title">Eclisse solare · 12 agosto 2026</span><span class="embed-subtitle"> · tocca la mappa per analizzare un punto</span></div>
   <a class="embed-open" href="./" target="_blank" rel="noopener noreferrer">Apri la mappa ↗</a>
 </div>
 <div id="side">
-  <h1>Eclisse solare del 12 agosto 2026</h1>
-  <div class="sub">Inizio dell’eclisse: 19:25 CEST</div>
-  <div class="sub">Trova i migliori punti per vedere l’eclisse</div>
+  <div class="radar-heading">
+    <div class="radar-kicker">Punto Eclisse</div>
+    <h1>Eclisse solare · 12 agosto</h1>
+    <div class="sub">Inizio: 19:25 CEST · scegli un punto sulla mappa</div>
+  </div>
 
-  <div class="card">
+  <div class="card radar-search">
     <h2>Cerca comune</h2>
     <input type="text" id="q-comune" autocomplete="off" placeholder="Es. Torino o Bolzano"
       aria-label="Cerca un comune italiano">
     <div id="q-results" aria-live="polite"></div>
-    <button id="locate-me" class="btn-play btn-locate" type="button" style="margin-top:10px">⌖ Usa la mia posizione</button>
+    <div class="radar-search-actions">
+      <button id="locate-me" class="btn-play btn-locate" type="button">⌖ Usa la mia posizione</button>
+    </div>
     <div id="geo-status" class="hint geo-status" role="status" aria-live="polite"></div>
   </div>
 
-  <div class="card">
+  <div class="card radar-selection" id="selection-card">
     <h2>Punto selezionato</h2>
     <div id="sel-empty" class="hint">Clicca sulla mappa per analizzare un punto.</div>
     <div id="sel" style="display:none">
@@ -265,6 +265,9 @@
       <button id="sim-close" class="sim-close" type="button" aria-label="Chiudi simulazione" title="Chiudi simulazione">×</button>
     </div>
     <svg id="sim-chart" viewBox="0 0 300 120" preserveAspectRatio="none"></svg>
+    <div class="sim-legend" aria-label="Legenda del grafico">
+      <span><i></i>visibile</span><span><i class="sim-hidden"></i>non osservabile</span><span><i class="sim-theory"></i>curva teorica</span><span><i class="sim-peak"></i>picco</span>
+    </div>
     <div style="display:flex;justify-content:flex-end;margin-top:8px">
       <button id="sim-play" type="button" class="btn-play">▶ Riproduci</button>
     </div>
@@ -272,7 +275,8 @@
       <svg id="sim-disc" width="58" height="58" viewBox="-29 -29 58 58"></svg>
       <div style="flex:1;min-width:0">
         <div class="kv"><span>Ora</span><b id="sim-t">–</b></div>
-        <div class="kv"><span>Oscuramento in quel momento</span><b id="sim-o">–</b></div>
+        <div class="kv"><span>Oscuramento visibile</span><b id="sim-o">–</b></div>
+        <div class="kv"><span>Oscuramento teorico</span><b id="sim-theo">–</b></div>
         <div class="pill" id="sim-status">–</div>
       </div>
     </div>
@@ -592,6 +596,7 @@ let inspectSeq = 0;
 // Prima il click fuori area non faceva nulla e sembrava che il sito fosse
 // rotto; su una mappa che e' per meta' mare capita spesso.
 function showNoData(ll){
+  document.body.classList.add('has-selection');
   $('#sel').style.display='none';
   $('#sim-card').style.display='none';
   $('#sel-empty').style.display='block';
@@ -606,6 +611,7 @@ function showNoData(ll){
 let CURRENT_POPUP = null;
 
 function resetSelection(){
+  document.body.classList.remove('has-selection');
   CURRENT_POPUP = null;
   CURRENT_SHARE_URL = null;
   $('#sel').style.display = 'none';
@@ -618,6 +624,7 @@ function resetSelection(){
   $('#v-last').textContent = '–';
   $('#v-elev').textContent = '–';
   $('#v-ll').textContent = '–';
+  $('#sim-theo').textContent = '–';
   $('#v-gmaps').href = '#';
   $('#v-share-msg').textContent = '';
 
@@ -665,6 +672,7 @@ function placeEmbedSimulation(){
 
 async function inspect(ll, {updateUrl=true}={}){
   if(!TILES) return;
+  document.body.classList.add('has-selection');
   const t = tileAt(ll);
   $('#sel-empty').style.display='none';
   $('#sel').style.display='none';
@@ -732,10 +740,8 @@ $('#v-share').onclick = () => {
 
 $('#op').oninput = e => map.setPaintProperty('score','raster-opacity', +e.target.value/100);
 
-// --- Pannello a scomparsa (mobile) ----------------------------------------
-// La mappa e' l'oggetto principale ma su telefono il pannello ne mangia meta'
-// schermo. La maniglia sta sulla cucitura fra i due e, a pannello chiuso,
-// risale in cima allo schermo restando l'unico comando visibile.
+// --- Compatibilita' con la vecchia maniglia mobile -------------------------
+// Radar la nasconde, ma il listener resta innocuo per i link embed esistenti.
 const panelToggle = $('#panel-toggle');
 
 function setPanel(open){
@@ -752,7 +758,7 @@ panelToggle.onclick = () => setPanel(document.body.classList.contains('map-full'
 
 // In orizzontale su telefono il pannello lascerebbe una striscia di mappa
 // troppo bassa per essere usata: si parte con la mappa a tutto schermo.
-if(window.matchMedia('(max-width: 768px) and (max-height: 460px)').matches){
+if(!document.body.classList.contains('radar-ui') && window.matchMedia('(max-width: 768px) and (max-height: 460px)').matches){
   setPanel(false);
 }
 
@@ -834,7 +840,7 @@ function buildChart(pts){
   }
 
   const dTheo = 'M' + pts.map((p, i) => x(i).toFixed(1) + ' ' + y(p.obsc).toFixed(1)).join(' L');
-  svg.appendChild(svgEl('path', { d: dTheo, fill: 'none', stroke: '#4a5568', 'stroke-width': 1, 'stroke-dasharray': '3,3' }));
+  svg.appendChild(svgEl('path', { d: dTheo, fill: 'none', stroke: '#8b98a8', 'stroke-width': 1, 'stroke-dasharray': '3,3' }));
 
   let dVis = 'M' + x(0).toFixed(1) + ' ' + SIM_H;
   pts.forEach((p, i) => { dVis += ' L' + x(i).toFixed(1) + ' ' + y(p.visible ? p.obsc : 0).toFixed(1); });
@@ -843,6 +849,17 @@ function buildChart(pts){
 
   const dLine = 'M' + pts.map((p, i) => x(i).toFixed(1) + ' ' + y(p.visible ? p.obsc : 0).toFixed(1)).join(' L');
   svg.appendChild(svgEl('path', { d: dLine, fill: 'none', stroke: '#4ade80', 'stroke-width': 1.6 }));
+
+  // La stessa curva teorica, colorata solo quando il Sole non e' osservabile:
+  // rende immediato il tratto di eclisse perso per tramonto o rilievi.
+  let dHidden = '', drawing = false;
+  pts.forEach((p, i) => {
+    if(!p.visible && p.obsc > 0.001){
+      dHidden += (drawing ? ' L' : 'M') + x(i).toFixed(1) + ' ' + y(p.obsc).toFixed(1);
+      drawing = true;
+    } else drawing = false;
+  });
+  if(dHidden) svg.appendChild(svgEl('path', { d: dHidden, fill: 'none', stroke: '#e07a4a', 'stroke-width': 2.2 }));
 
   const cursor = svgEl('line', { x1: 0, y1: 0, x2: 0, y2: SIM_H, stroke: '#e6edf3', 'stroke-width': 1, 'stroke-dasharray': '2,2' });
   svg.appendChild(cursor);
@@ -857,6 +874,15 @@ function markVertical(chart, idx, color, label){
   const t = svgEl('text', { x: px, y: 10, 'text-anchor': anchor, fill: color, 'font-size': 9 });
   t.textContent = label;
   chart.svg.appendChild(t);
+}
+
+function markPeak(chart, idx, obsc, color, label, labelY=20){
+  const px = chart.x(idx), py = chart.y(obsc);
+  chart.svg.appendChild(svgEl('circle', { cx: px, cy: py, r: 3.4, fill: color, stroke: '#0d1117', 'stroke-width': 1.2 }));
+  const anchor = px > SIM_W - 55 ? 'end' : (px < 55 ? 'start' : 'middle');
+  const text = svgEl('text', { x: px, y: labelY, 'text-anchor': anchor, fill: color, 'font-size': 9, 'font-weight': 700 });
+  text.textContent = label;
+  chart.svg.appendChild(text);
 }
 
 function renderDisc(p){
@@ -912,9 +938,12 @@ function scrubToIndex(idx){
   SIM_CHART.cursor.setAttribute('x2', SIM_CHART.x(idx));
   $('#sim-t').textContent = fmtHM(p.t) + ' CEST';
   $('#sim-o').textContent = (p.visible ? (p.obsc * 100).toFixed(1) : '0.0') + '%';
+  $('#sim-theo').textContent = (p.obsc * 100).toFixed(1) + '%';
   $('#sim-status').textContent = p.visible
     ? "Sole visibile sopra l'orizzonte reale" : 'Sole nascosto dietro i monti';
   renderDisc(p);
+  // Il cursore deve restare leggibile anche vicino ai marcatori di minimo e picco.
+  SIM_CHART.svg.appendChild(SIM_CHART.cursor);
 }
 
 let simScrubBound = false;
@@ -950,18 +979,11 @@ function updateSim(lat, lon, horDeg, maiVisibile){
     summary.textContent = 'Simulazione non disponibile (libreria astronomica non caricata).';
     $('#sim-chart').innerHTML = ''; $('#sim-disc').innerHTML = '';
     SIM_PTS = null; SIM_PLAY_RANGE = null; $('#sim-play').disabled = true;
+    $('#sim-theo').textContent = '–';
     $('#v-first').textContent = '–'; $('#v-last').textContent = '–';
     return;
   }
 
-  if(maiVisibile){
-    SIM_PTS = null; SIM_CHART = null; SIM_PLAY_RANGE = null; $('#sim-play').disabled = true;
-    $('#sim-chart').innerHTML = ''; $('#sim-disc').innerHTML = '';
-    $('#sim-t').textContent = '–'; $('#sim-o').textContent = '–'; $('#sim-status').textContent = '–';
-    summary.textContent = "In questo punto il Sole eclissato resta sempre sotto l'orizzonte reale: non è mai visibile.";
-    $('#v-first').textContent = 'mai visibile'; $('#v-last').textContent = 'mai visibile';
-    return;
-  }
   $('#sim-play').disabled = false;
 
   const pts = simulate(lat, lon, horDeg);
@@ -976,6 +998,11 @@ function updateSim(lat, lon, horDeg, maiVisibile){
   pts.forEach((p, i) => { if(p.visible){ if(segStart < 0) segStart = i; segEnd = i; } });
   let contactStart = -1, contactEnd = -1;
   pts.forEach((p, i) => { if(p.visible && p.obsc > 0.001){ if(contactStart < 0) contactStart = i; contactEnd = i; } });
+  let theoryStart = -1, theoryEnd = -1, theoryPeak = 0;
+  pts.forEach((p, i) => {
+    if(p.obsc > 0.001){ if(theoryStart < 0) theoryStart = i; theoryEnd = i; }
+    if(p.obsc > pts[theoryPeak].obsc) theoryPeak = i;
+  });
   $('#v-first').textContent = contactStart >= 0 ? fmtHM(pts[contactStart].t) + ' CEST' : 'mai visibile';
   $('#v-last').textContent = contactEnd >= 0 ? fmtHM(pts[contactEnd].t) + ' CEST' : 'mai visibile';
 
@@ -1002,12 +1029,17 @@ function updateSim(lat, lon, horDeg, maiVisibile){
   }
 
   bindScrubOnce();
-  let bestIdx = segStart >= 0 ? segStart : 0;
+  let bestIdx = contactStart >= 0 ? contactStart : theoryPeak;
   pts.forEach((p, i) => { if(p.visible && p.obsc > pts[bestIdx].obsc) bestIdx = i; });
-  // La riproduzione si conclude al massimo oscuramento effettivamente
-  // visibile: il valore finale di "Oscuramento in quel momento" coincide
-  // quindi con il picco della simulazione per il punto selezionato.
-  SIM_PLAY_RANGE = segStart >= 0 ? { start: segStart, end: bestIdx } : null;
+  if(theoryStart >= 0) markVertical(SIM_CHART, theoryStart, '#78a6ff', 'minimo');
+  if(theoryEnd >= 0) markVertical(SIM_CHART, theoryEnd, '#78a6ff', 'fine');
+  if(contactStart >= 0) markPeak(SIM_CHART, bestIdx, pts[bestIdx].obsc, '#4ade80', 'massimo visto', 20);
+  markPeak(SIM_CHART, theoryPeak, pts[theoryPeak].obsc, '#f4b942',
+    theoryPeak === bestIdx ? 'picco visto' : 'picco teorico', 10);
+  // Anche se il picco cade dietro l'orizzonte, la riproduzione percorre
+  // l'intero fenomeno e il valore teorico resta quindi ispezionabile.
+  SIM_PLAY_RANGE = theoryStart >= 0 ? { start: theoryStart, end: theoryEnd } : null;
+  $('#sim-play').disabled = !SIM_PLAY_RANGE;
   scrubToIndex(bestIdx);
 }
 </script>
