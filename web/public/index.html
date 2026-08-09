@@ -164,8 +164,8 @@
   .details-options[open] summary{margin-bottom:10px}
   .details-options .card:last-child{margin-bottom:0}
 
-  /* Radar non usa una maniglia: anche su telefono la mappa resta disponibile
-     dietro i pannelli compatti. */
+  /* Su desktop la ricerca resta nel pannello; su telefono il controllo viene
+     mostrato come maniglia compatta sopra la mappa. */
   #panel-toggle{display:none}
 
   /* Versione pensata per essere inclusa in un articolo: con circa 760 px di
@@ -208,8 +208,17 @@
     :root{--radar-panel-h:46dvh}
     #side{inset:0 0 auto;width:auto;height:var(--radar-panel-h);padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) 10px max(10px,env(safe-area-inset-left));
       background:linear-gradient(to bottom,rgba(13,17,23,.42),rgba(13,17,23,0));
-      pointer-events:auto;touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+      pointer-events:auto;touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+      transition:height .2s ease,padding .2s ease;}
     #map{inset:var(--radar-panel-h) 0 0}
+    #panel-toggle{position:absolute;z-index:6;display:inline-flex;align-items:center;gap:6px;
+      top:max(10px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));min-height:36px;
+      padding:7px 11px;border:1px solid rgba(88,101,114,.9);border-radius:9px;background:rgba(9,15,25,.96);
+      box-shadow:0 8px 18px rgba(0,0,0,.34);color:#f0f6fc;font:600 13px/1 system-ui;cursor:pointer}
+    #panel-toggle:focus-visible{outline:2px solid #58a6ff;outline-offset:2px}
+    body:not(.mobile-panel-closed) #panel-toggle{top:calc(var(--radar-panel-h) + 8px)}
+    body.mobile-panel-closed #side{height:0;padding-top:0;padding-bottom:0;overflow:hidden;pointer-events:none}
+    body.mobile-panel-closed #map{inset:0}
     .radar-heading{padding:9px 11px}.radar-heading .sub:last-child{display:none}
     .radar-search-actions .btn-locate{font-size:13px;padding:8px 10px}
     #side .details-options,#side footer{display:none}
@@ -224,7 +233,7 @@
 
 </style>
 </head>
-<body class="radar-ui">
+<body class="radar-ui mobile-panel-closed">
 <div id="embed-header" aria-label="Mappa incorporata">
   <div><span class="embed-title">Eclisse solare · 12 agosto 2026</span><span class="embed-subtitle"> · tocca la mappa per analizzare un punto</span></div>
   <a class="embed-open" href="./" target="_blank" rel="noopener noreferrer">Apri la mappa ↗</a>
@@ -337,9 +346,9 @@
   </footer>
 </div>
 <div id="map"></div>
-<button id="panel-toggle" type="button" aria-controls="side" aria-expanded="true">
-  <span id="panel-toggle-icon" aria-hidden="true">▲</span>
-  <span id="panel-toggle-text">Nascondi pannello</span>
+<button id="panel-toggle" type="button" aria-controls="side" aria-expanded="false">
+  <span id="panel-toggle-icon" aria-hidden="true">⌄</span>
+  <span id="panel-toggle-text">Cerca un luogo</span>
 </button>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -424,6 +433,11 @@ function fitMobilePanel(){
   mobilePanelFrame = 0;
   if(EMBEDDED || !mobilePanelMedia.matches){
     document.documentElement.style.removeProperty('--radar-panel-h');
+    return;
+  }
+  if(document.body.classList.contains('mobile-panel-closed')){
+    document.documentElement.style.setProperty('--radar-panel-h', '0px');
+    map.resize();
     return;
   }
   const maxHeight = Math.floor(window.innerHeight * 0.46);
@@ -787,27 +801,24 @@ $('#v-share').onclick = () => {
 
 $('#op').oninput = e => map.setPaintProperty('score','raster-opacity', +e.target.value/100);
 
-// --- Compatibilita' con la vecchia maniglia mobile -------------------------
-// Radar la nasconde, ma il listener resta innocuo per i link embed esistenti.
+// --- Pannello mobile --------------------------------------------------------
 const panelToggle = $('#panel-toggle');
 
 function setPanel(open){
-  document.body.classList.toggle('map-full', !open);
+  const mobile = mobilePanelMedia.matches && !EMBEDDED;
+  document.body.classList.toggle('mobile-panel-closed', mobile && !open);
   panelToggle.setAttribute('aria-expanded', String(open));
-  $('#panel-toggle-icon').textContent = open ? '▲' : '▼';
-  $('#panel-toggle-text').textContent = open ? 'Nascondi pannello' : 'Mostra pannello';
+  $('#panel-toggle-icon').textContent = open ? '⌃' : '⌄';
+  $('#panel-toggle-text').textContent = open ? 'Nascondi ricerca' : 'Cerca un luogo';
   // Il contenitore cambia altezza: senza resize il canvas resta della misura
   // vecchia e la mappa appare tagliata o schiacciata.
-  map.resize();
+  scheduleMobilePanelFit();
+  requestAnimationFrame(() => map.resize());
 }
 
-panelToggle.onclick = () => setPanel(document.body.classList.contains('map-full'));
+panelToggle.onclick = () => setPanel(document.body.classList.contains('mobile-panel-closed'));
 
-// In orizzontale su telefono il pannello lascerebbe una striscia di mappa
-// troppo bassa per essere usata: si parte con la mappa a tutto schermo.
-if(!document.body.classList.contains('radar-ui') && window.matchMedia('(max-width: 768px) and (max-height: 460px)').matches){
-  setPanel(false);
-}
+mobilePanelMedia.addEventListener('change', event => setPanel(!event.matches));
 
 // --- Simulazione grafica dell'eclisse nel punto selezionato ---------------
 // Riusa la stessa formula di pipeline/04_score.py (astronomy-engine, stessa
