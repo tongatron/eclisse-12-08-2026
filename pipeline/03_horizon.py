@@ -8,7 +8,7 @@ data/derived/horizon.tif, multi-banda int16, una banda per azimut di griglia
 -32768. Nessuna data, nessun dato personale. Istruzione utente: "Crea mappa
 per tutto il territorio italiano, non solo per il piemonte"
 
-Per ogni cella di output e ogni azimut, marcia lungo il raggio fino a 250 km e
+Per ogni cella di output e ogni azimut, marcia lungo il raggio fino a 150 km e
 tiene il massimo di
 
     tan(alpha) = (h_bersaglio - h_osservatore - d^2 / (2 R_eff)) / d
@@ -41,6 +41,8 @@ from config import (
     AZ_STEP,
     CRS_WORK,
     DERIVED,
+    HORIZON_PLAN,
+    HORIZON_POOL_FACTORS,
     R_EFF_M,
     RES_M,
 )
@@ -57,9 +59,6 @@ SCALE = 100.0  # int16 in centesimi di grado
 # dell'eclisse) servirebbe un rilievo entro 89 km; a 150 km il limite scende a
 # ~1.2 gradi. Sotto 2.6 gradi il punteggio satura comunque, quindi il campo
 # oltre 150 km non puo' cambiare il risultato.
-PLAN = [(10_000.0, 0), (30_000.0, 1), (80_000.0, 2), (150_000.0, 3)]
-POOL = [1, 4, 12, 24]  # fattori di max-pool rispetto ai 90 m
-
 # Celle osservatore processate per volta. Tiene i temporanei del raycast entro
 # qualche decina di MB, cioe' dentro la cache: vedi horizon_for_azimuth().
 CHUNK = 300_000
@@ -84,7 +83,7 @@ def aoi_window(tr, shape) -> tuple[int, int, int, int]:
 def build_pyramid(dem: np.ndarray) -> list[tuple[np.ndarray, float]]:
     """Livelli max-pooled: (array, risoluzione_m)."""
     levels = [(dem, RES_M)]
-    for f in POOL[1:]:
+    for f in HORIZON_POOL_FACTORS[1:]:
         h, w = dem.shape
         hh, ww = h // f, w // f
         block = dem[: hh * f, : ww * f].reshape(hh, f, ww, f)
@@ -118,7 +117,7 @@ def horizon_for_azimuth(
         bc = np.full(i1 - i0, -9.0, dtype="float32")
 
         d_prev = 0.0
-        for d_max, lev in PLAN:
+        for d_max, lev in HORIZON_PLAN:
             arr, res = levels[lev]
             nrow, ncol = arr.shape
             step = res  # un passo per cella del livello: non salta nulla

@@ -43,7 +43,7 @@ Lo stadio `05_access.py` è opzionale e sperimentale: non alimenta la mappa pubb
 | `05_access.py` *(opzionale)* | Stima la distanza dalla strada percorribile più vicina | `score.tif`, estratto OSM | `access.tif` |
 | `06_export.py` | Prepara immagini e tasselli per il browser | `score.tif`, `obs.tif` | `web/public/data/` |
 | `build_comuni_index.py` | Prepara la ricerca locale dei comuni | codici e confini ISTAT | `web/public/data/comuni.json` |
-| `validate.py` | Esegue controlli di coerenza | raster derivati | solo output a console |
+| `validate.py` | Esegue controlli di coerenza e pubblica il report | raster derivati | `web/public/data/validation.json` |
 
 ## Dettaglio degli stadi
 
@@ -124,7 +124,13 @@ Dopo ogni rigenerazione eseguire:
 python pipeline/validate.py
 ```
 
-Il comando non scrive file: confronta il raster dell'orizzonte con un calcolo analitico indipendente e stampa una tabella di località di controllo.
+Il comando confronta il raster dell'orizzonte con un calcolo analitico
+indipendente e stampa una tabella di località di controllo. Scrive inoltre
+`web/public/data/validation.json`, mostrato nella pagina pubblica
+`affidabilita.html`: contiene data dei dati analizzati, data della verifica,
+parametri della griglia, esito del controllo Torino–Rocciamelone e tutti i
+campioni territoriali. Se il confronto analitico fallisce, il comando termina
+con errore e il report non deve essere pubblicato.
 
 Prima del commit, verificare gli asset generati e incrementare `ASSET_V` in `web/public/index.html`. Il parametro di versione evita che browser e service worker combinino HTML nuovo con raster precedenti in cache. Infine versionare gli asset in `web/public/data/` e pubblicare su `master`; GitHub Pages serve quella cartella come sito statico.
 

@@ -43,6 +43,9 @@ punto si ottengono oscuramento, orario, altezza del Sole e quota locale.
 - **Geolocalizzazione su richiesta**, condivisibile solo se l'utente lo sceglie.
 - **Esperienza mobile e PWA**, con pannello richiudibile per lasciare la mappa
   a tutto schermo.
+- **Affidabilità verificabile**, con data dei dati, report della validazione,
+  campioni territoriali e limiti d'uso pubblicati nella
+  [pagina dedicata](https://eclisse-12-08-2026.tongatron.org/affidabilita.html).
 
 ## Come funziona
 

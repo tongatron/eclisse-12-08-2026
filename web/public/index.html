@@ -266,13 +266,14 @@
         <br><br>
         La mappa colorata è una vista d'insieme a 600 m; i valori esatti che compaiono cliccando
         arrivano da tasselli a 250 m scaricati solo per la zona che stai guardando.
+        <br><br><a href="affidabilita.html">Leggi affidabilità, validazione e limiti del dato →</a>
       </div>
     </div>
   </details>
 
   <footer>
     <p>Un progetto di <a href="https://tongatron.org" target="_blank" rel="noopener noreferrer">tongatron.org</a></p>
-    <p>© 2026 Giovanni Bindi · contenuti <a href="https://creativecommons.org/licenses/by/4.0/deed.it" target="_blank" rel="license noopener noreferrer">CC BY 4.0</a> · <a href="https://github.com/tongatron/eclisse-12-08-2026" target="_blank" rel="noopener noreferrer">repository GitHub</a> · <a href="https://github.com/tongatron/eclisse-12-08-2026/blob/master/LICENSE" target="_blank" rel="license noopener noreferrer">codice MIT</a></p>
+    <p>© 2026 Giovanni Bindi · contenuti <a href="https://creativecommons.org/licenses/by/4.0/deed.it" target="_blank" rel="license noopener noreferrer">CC BY 4.0</a> · <a href="affidabilita.html">affidabilità del dato</a> · <a href="https://github.com/tongatron/eclisse-12-08-2026" target="_blank" rel="noopener noreferrer">repository GitHub</a> · <a href="https://github.com/tongatron/eclisse-12-08-2026/blob/master/LICENSE" target="_blank" rel="license noopener noreferrer">codice MIT</a></p>
     <details>
       <summary>Licenze e riuso</summary>
       <p>Il codice del sito e della pipeline è rilasciato con licenza <a href="https://github.com/tongatron/eclisse-12-08-2026/blob/master/LICENSE" target="_blank" rel="license noopener noreferrer">MIT</a>. Testi, visualizzazioni e immagini originali sono rilasciati con licenza <a href="https://creativecommons.org/licenses/by/4.0/deed.it" target="_blank" rel="license noopener noreferrer">Creative Commons Attribuzione 4.0 Internazionale (CC BY 4.0)</a>, salvo diversa indicazione.</p>
@@ -300,7 +301,7 @@ if('serviceWorker' in navigator){
 // l'HTML: dopo un deploy il browser riceveva index.html aggiornato insieme a
 // score.png vecchio di un'ora, cioe' la heatmap sbagliata stirata sui nuovi
 // angoli. Da alzare a ogni rigenerazione della pipeline.
-const ASSET_V = '20260809a';
+const ASSET_V = '20260809b';
 const v = url => url + (url.includes('?') ? '&' : '?') + 'v=' + ASSET_V;
 
 // L'elenco e' incluso nel deploy statico: la ricerca non invia cio' che

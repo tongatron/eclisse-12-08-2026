@@ -48,10 +48,12 @@ pipeline/                  calcolo offline in Python
 
 web/public/                sito statico pubblicato da GitHub Pages
   index.html               interfaccia MapLibre e lettura dei pixel
+  affidabilita.html        versione, validazione e limiti del dato
   data/score.png           heatmap nazionale a 600 m
   data/meta.json           griglia, bounding box e legenda
   data/tiles/              dati di dettaglio a 250 m
   data/comuni.json         indice locale dei 7.894 comuni per la ricerca
+  data/validation.json     esito e campioni dell'ultima validazione
 ```
 
 All'avvio il browser carica solo `score.png`. I valori mostrati al clic
@@ -122,8 +124,12 @@ pubblicato da GitHub Pages.
 - coordinate e orari dell'eclisse;
 - intervallo e coerenza delle bande raster esportate.
 
-La validazione non scrive output persistenti. Va eseguita dopo ogni rigenerazione
-dei dati.
+Al termine scrive `web/public/data/validation.json`, che alimenta la pagina
+pubblica [Affidabilità del dato](web/public/affidabilita.html). Il report
+registra data dei dati analizzati, data della verifica, parametri della griglia,
+esito del confronto analitico Torino–Rocciamelone e i campioni territoriali.
+Il comando termina con errore se il controllo analitico non supera la tolleranza.
+Va eseguito dopo ogni rigenerazione dei dati e versionato insieme agli asset.
 
 ## Frontend e cache
 
@@ -153,6 +159,8 @@ only verso `tongatron.github.io`.
 - La mappa non include il meteo: una buona visibilità geometrica non implica
   cielo sereno.
 - Il DEM a 90 m e l'export a 250 m non descrivono ostacoli molto locali.
+- Un valore alto di copertura visibile non certifica un punto di osservazione:
+  restano da verificare accesso, proprietà, sicurezza e orizzonte reale.
 - Mappe di base e geocoding pubblici sono adatti a traffico moderato; per un
   uso intenso serve un provider dedicato.
 - Possibili evoluzioni: overlay meteo, profilo dell'orizzonte nel popup,
