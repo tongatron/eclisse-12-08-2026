@@ -149,6 +149,21 @@
      una volta sola, senza dipendere dal viewport corrente. */
   #panel-toggle{display:none}
 
+  /* Versione pensata per essere inclusa in un articolo: con circa 760 px di
+     colonna un pannello laterale da 340 px lascerebbe alla mappa una striscia
+     troppo stretta. L'embed privilegia quindi la mappa, mantenendo un link
+     esplicito all'app completa per ricerca, simulazione e dettagli. */
+  #embed-header{display:none}
+  body.embedded #side,body.embedded #panel-toggle{display:none}
+  body.embedded #map{inset:52px 0 0}
+  body.embedded #embed-header{position:absolute;z-index:10;display:flex;
+    align-items:center;justify-content:space-between;gap:12px;top:0;right:0;left:0;height:52px;
+    padding:0 14px;background:#161b22;border-bottom:1px solid var(--line);color:var(--txt)}
+  .embed-title{font-weight:700;letter-spacing:-.01em}.embed-subtitle{color:var(--dim);font-size:12px}
+  .embed-open{flex:none;border:1px solid #2ea043;border-radius:6px;background:var(--acc);padding:6px 9px;
+    color:#0d1117;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
+  .embed-open:hover{background:#56d364}
+
   @media (max-width: 768px){
     /* Niente scroll di documento: scorre il pannello, non la pagina. Con il
        body scrollabile il trascinamento sulla mappa muoveva la pagina. */
@@ -173,6 +188,10 @@
     /* A pannello chiuso i controlli di MapLibre finirebbero sotto la maniglia
        centrata in alto: vanno spostati piu' in basso. */
     body.map-full .maplibregl-ctrl-top-right{margin-top:40px}
+
+    body.embedded #map{inset:52px 0 0}
+    body.embedded #embed-header{padding:0 10px;gap:8px}
+    body.embedded .embed-subtitle{display:none}
   }
 
   /* Telefono in orizzontale: 46dvh di pannello lascerebbero una striscia di
@@ -183,6 +202,10 @@
 </style>
 </head>
 <body>
+<div id="embed-header" aria-label="Mappa incorporata">
+  <div><span class="embed-title">Eclisse solare · 12 agosto 2026</span><span class="embed-subtitle"> · tocca la mappa per analizzare un punto</span></div>
+  <a class="embed-open" href="./" target="_blank" rel="noopener noreferrer">Apri la mappa ↗</a>
+</div>
 <div id="side">
   <h1>Eclisse solare del 12 agosto 2026</h1>
   <div class="sub">Inizio dell’eclisse: 19:25 CEST</div>
@@ -292,6 +315,8 @@
 <script src="https://unpkg.com/astronomy-engine@2.1.19/astronomy.browser.js"></script>
 <script>
 const $ = s => document.querySelector(s);
+const EMBEDDED = new URLSearchParams(location.search).get('embed') === '1';
+if(EMBEDDED) document.body.classList.add('embedded');
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
