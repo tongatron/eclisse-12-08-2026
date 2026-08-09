@@ -166,9 +166,21 @@
   /* La simulazione viene spostata fuori dal pannello laterale solo nella
      versione incorporata e appare dopo la scelta di un punto. In questo modo
      resta disponibile senza sottrarre spazio alla prima vista della mappa. */
-  body.embedded #sim-card{position:absolute;z-index:20;bottom:12px;left:12px;width:min(370px,calc(100% - 24px));
-    max-height:calc(100% - 76px);overflow:auto;margin:0;box-shadow:0 10px 28px rgba(0,0,0,.48)}
+  body.embedded #sim-card{position:absolute;z-index:20;bottom:12px;left:12px;width:320px;
+    max-width:calc(100% - 24px);max-height:calc(100% - 76px);overflow:auto;margin:0;padding:10px;
+    box-shadow:0 10px 28px rgba(0,0,0,.48)}
+  body.embedded #sim-card.sim-right{left:auto;right:12px}
+  .sim-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+  .sim-heading h2{margin:0}.sim-close{display:none}
   body.embedded #sim-card h2{font-size:11px}
+  body.embedded #sim-card #sim-chart{height:96px}
+  body.embedded #sim-card #sim-disc{width:44px;height:44px}
+  body.embedded #sim-card .btn-play{padding:6px 10px;font-size:12px}
+  body.embedded #sim-card .kv{padding:2px 0;font-size:12px}
+  body.embedded #sim-card .hint{font-size:11px}
+  body.embedded .sim-close{display:grid;place-items:center;flex:none;width:24px;height:24px;padding:0;
+    border:1px solid var(--line);border-radius:5px;background:#21262d;color:var(--txt);font:20px/1 system-ui;cursor:pointer}
+  body.embedded .sim-close:hover{background:#30363d}
 
   @media (max-width: 768px){
     /* Niente scroll di documento: scorre il pannello, non la pagina. Con il
@@ -198,7 +210,8 @@
     body.embedded #map{inset:52px 0 0}
     body.embedded #embed-header{padding:0 10px;gap:8px}
     body.embedded .embed-subtitle{display:none}
-    body.embedded #sim-card{bottom:10px;left:10px;width:calc(100% - 20px);max-height:calc(100% - 68px)}
+    body.embedded #sim-card{bottom:10px;left:10px;width:300px;max-width:calc(100% - 20px);max-height:calc(100% - 68px)}
+    body.embedded #sim-card.sim-right{left:auto;right:10px}
   }
 
   /* Telefono in orizzontale: 46dvh di pannello lascerebbero una striscia di
@@ -247,7 +260,10 @@
   </div>
 
   <div class="card" id="sim-card" style="display:none">
-    <h2>Simulazione dell'eclisse</h2>
+    <div class="sim-heading">
+      <h2>Simulazione dell'eclisse</h2>
+      <button id="sim-close" class="sim-close" type="button" aria-label="Chiudi simulazione" title="Chiudi simulazione">×</button>
+    </div>
     <svg id="sim-chart" viewBox="0 0 300 120" preserveAspectRatio="none"></svg>
     <div style="display:flex;justify-content:flex-end;margin-top:8px">
       <button id="sim-play" type="button" class="btn-play">▶ Riproduci</button>
@@ -631,6 +647,22 @@ function showPopup(ll){
   return popup;
 }
 
+function rectsOverlap(a, b){
+  return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+}
+
+// Il risultato del punto resta sempre leggibile: se il popup e il pannello
+// compatto si incontrano in basso a sinistra, il pannello passa a destra.
+function placeEmbedSimulation(){
+  if(!EMBEDDED || $('#sim-card').style.display === 'none') return;
+  const sim = $('#sim-card');
+  const popup = document.querySelector('.maplibregl-popup');
+  sim.classList.remove('sim-right');
+  if(popup && rectsOverlap(sim.getBoundingClientRect(), popup.getBoundingClientRect())){
+    sim.classList.add('sim-right');
+  }
+}
+
 async function inspect(ll, {updateUrl=true}={}){
   if(!TILES) return;
   const t = tileAt(ll);
@@ -685,6 +717,9 @@ async function inspect(ll, {updateUrl=true}={}){
     .setHTML('<b style="color:'+col+'">'+(mai ? '0.0' : obsc.toFixed(1))+'%</b> di oscuramento visibile'+
       '<br><span style="color:#8b98a8">Istante migliore: '+$('#v-time').textContent+'</span>'+
       '<br><span style="color:#8b98a8">Ultimo contatto locale: '+$('#v-last').textContent+'</span>');
+  // MapLibre inserisce il popup nel DOM dopo il suo posizionamento: attendere
+  // due frame rende affidabile il confronto fra i rettangoli dei due pannelli.
+  if(EMBEDDED) requestAnimationFrame(() => requestAnimationFrame(placeEmbedSimulation));
 }
 
 let CURRENT_SHARE_URL = null;
@@ -863,6 +898,11 @@ function startPlay(){
 }
 
 $('#sim-play').onclick = () => { simPlayTimer ? stopPlay() : startPlay(); };
+
+$('#sim-close').onclick = () => {
+  stopPlay();
+  $('#sim-card').style.display = 'none';
+};
 
 function scrubToIndex(idx){
   if(!SIM_PTS || !SIM_CHART) return;
