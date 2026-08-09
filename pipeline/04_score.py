@@ -8,8 +8,7 @@ Schema output: GeoTIFF 4 bande float32, CRS AEQD, pixel 180 m.
   3 t_best     - minuti dopo le 19:00 CEST del momento migliore
   4 hor_used   - angolo di orizzonte all'azimut solare in quel momento [gradi]
 Date in UTC, formato tuple (2026, 8, 12, 17, 25, 0) = 19:25 CEST.
-Nessun dato personale. Istruzione utente: "gestisci accessibilita. Meteo
-mettilo nei to-do. Procedi"
+Nessun dato personale.
 
 Tre correzioni che cambiano il risultato e vanno tenute insieme:
 

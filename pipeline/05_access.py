@@ -49,31 +49,47 @@ def coverage_mask(poly_path, tr, nrow, ncol) -> np.ndarray:
     from rasterio.features import rasterize
     from shapely.geometry import Polygon
     from shapely.ops import transform as sh_transform
+    from shapely.ops import unary_union
 
-    rings, cur, hole = [], [], []
-    for line in poly_path.read_text().splitlines():
+    rings: list[tuple[list[tuple[float, float]], bool]] = []
+    current: list[tuple[float, float]] | None = None
+    is_hole = False
+    for line in poly_path.read_text(encoding="utf-8").splitlines():
         t = line.strip()
-        if not t or t == "none":
+        if not t:
             continue
         if t == "END":
-            if cur:
-                rings.append((cur, hole and hole[-1]))
-                cur = []
+            if current is None:
+                break
+            if len(current) >= 4:
+                rings.append((current, is_hole))
+            current = None
             continue
         parts = t.split()
-        if len(parts) == 2:
+        if current is not None and len(parts) == 2:
             try:
-                cur.append((float(parts[0]), float(parts[1])))
+                current.append((float(parts[0]), float(parts[1])))
                 continue
             except ValueError:
                 pass
-        hole.append(t.startswith("!"))
+        # Una riga non numerica apre un nuovo anello. Nel formato .poly il
+        # prefisso ! indica una cavita' da sottrarre al footprint.
+        current = []
+        is_hole = t.startswith("!")
 
     fwd = Transformer.from_crs("EPSG:4326", CRS_WORK, always_xy=True)
-    outers = [Polygon(r) for r, h in rings if len(r) >= 4 and not h]
-    geoms = [sh_transform(lambda x, y: fwd.transform(x, y), p) for p in outers]
+    def project(ring):
+        return sh_transform(lambda x, y: fwd.transform(x, y), Polygon(ring))
+
+    outers = [project(ring) for ring, hole in rings if not hole]
+    holes = [project(ring) for ring, hole in rings if hole]
+    if not outers:
+        raise ValueError(f"Footprint .poly non valido o vuoto: {poly_path}")
+    footprint = unary_union(outers)
+    if holes:
+        footprint = footprint.difference(unary_union(holes))
     arr = rasterize(
-        [(g, 1) for g in geoms], out_shape=(nrow, ncol), transform=tr, dtype="uint8"
+        [(footprint, 1)], out_shape=(nrow, ncol), transform=tr, dtype="uint8"
     )
     return arr.astype(bool)
 
@@ -126,6 +142,12 @@ def main() -> int:
     if not PBF.exists():
         print(f"Manca {PBF}", file=sys.stderr)
         return 1
+    if not POLY.exists():
+        print(f"Manca {POLY}", file=sys.stderr)
+        return 1
+    if not SCORE.exists():
+        print(f"Manca {SCORE}: eseguire prima 04_score.py", file=sys.stderr)
+        return 1
 
     with rasterio.open(SCORE) as s:
         tr, crs, (nrow, ncol) = s.transform, s.crs, s.shape
@@ -134,6 +156,9 @@ def main() -> int:
     print("Lettura PBF...", flush=True)
     lon1, lat1, lon2, lat2 = read_roads(PBF)
     print(f"  in {time.time() - t0:.0f}s", flush=True)
+    if not len(lon1):
+        print("Nessuna strada carrozzabile trovata nell'estratto OSM", file=sys.stderr)
+        return 1
 
     fwd = Transformer.from_crs("EPSG:4326", CRS_WORK, always_xy=True)
     xa, ya = fwd.transform(lon1, lat1)

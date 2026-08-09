@@ -732,6 +732,10 @@ function placeEmbedSimulation(){
 
 async function inspect(ll, {updateUrl=true}={}){
   if(!TILES) return;
+  // Invalida subito una lettura precedente, anche quando il nuovo punto e'
+  // fuori dalla griglia. Altrimenti un tassello lento poteva ripristinare il
+  // vecchio risultato dopo che l'utente aveva gia' scelto il mare.
+  const seq = ++inspectSeq;
   document.body.classList.add('has-selection');
   const t = tileAt(ll);
   $('#sel-empty').style.display='none';
@@ -739,7 +743,6 @@ async function inspect(ll, {updateUrl=true}={}){
   $('#sim-card').style.display='none';
   if(!t){ showNoData(ll); return; }
 
-  const seq = ++inspectSeq;
   $('#sel-empty').style.display='block';
   $('#sel-empty').textContent = 'Carico i dati di questa zona…';
 
@@ -794,7 +797,12 @@ async function inspect(ll, {updateUrl=true}={}){
 let CURRENT_SHARE_URL = null;
 $('#v-share').onclick = () => {
   if(!CURRENT_SHARE_URL) return;
-  navigator.clipboard.writeText(CURRENT_SHARE_URL)
+  const copy = navigator.clipboard?.writeText;
+  if(!copy){
+    $('#v-share-msg').textContent = CURRENT_SHARE_URL;
+    return;
+  }
+  copy.call(navigator.clipboard, CURRENT_SHARE_URL)
     .then(() => { $('#v-share-msg').textContent = 'Link copiato negli appunti.'; })
     .catch(() => { $('#v-share-msg').textContent = CURRENT_SHARE_URL; });
 };

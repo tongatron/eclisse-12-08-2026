@@ -3,9 +3,8 @@
 Chiamato da CLI; il suo output dem_aeqd.tif alimenta 03_horizon.py.
 Nessun altro file in pipeline/ esegue mosaicatura o riproiezione.
 Legge data/dem_tiles/*.tif (float32, quote in m, nodata -32767).
-Scrive data/derived/dem_aeqd.tif (float32, CRS AEQD lat_0=45.3 lon_0=7.9,
+Scrive data/derived/dem_aeqd.tif (float32, CRS AEQD lat_0=42.0 lon_0=12.5,
 pixel 90 m, mare = 0 m). Nessuna data, nessun dato personale.
-Istruzione utente: "gestisci accessibilita. Meteo mettilo nei to-do. Procedi"
 """
 
 import sys

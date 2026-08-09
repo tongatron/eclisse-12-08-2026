@@ -3,8 +3,7 @@
 Eseguito da CLI, non importato da nessun altro modulo. Legge
 data/derived/{score.tif,horizon.tif,dem_aeqd.tif} e scrive il report pubblico
 web/public/data/validation.json.
-Nessun dato personale. Istruzione utente: "gestisci accessibilita. Meteo
-mettilo nei to-do. Procedi"
+Nessun dato personale.
 
 Due verifiche indipendenti:
   A. confronto analitico - angolo di elevazione di una cima nota calcolato a

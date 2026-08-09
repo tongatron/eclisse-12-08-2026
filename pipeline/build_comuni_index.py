@@ -56,6 +56,8 @@ NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
 
 
 def read_shared_strings(archive: zipfile.ZipFile) -> list[str]:
+    if "xl/sharedStrings.xml" not in archive.namelist():
+        return []
     root = ET.fromstring(archive.read("xl/sharedStrings.xml"))
     return ["".join(node.itertext()) for node in root.findall(f"{NS}si")]
 
@@ -63,7 +65,8 @@ def read_shared_strings(archive: zipfile.ZipFile) -> list[str]:
 def cell_value(cell: ET.Element, shared: list[str]) -> str:
     value = cell.find(f"{NS}v")
     if value is None:
-        return ""
+        inline = cell.find(f"{NS}is")
+        return "" if inline is None else "".join(inline.itertext())
     text = value.text or ""
     return shared[int(text)] if cell.get("t") == "s" else text
 
