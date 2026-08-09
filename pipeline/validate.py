@@ -1,7 +1,8 @@
 """Controllo di sanita' su punti noti: i numeri della pipeline reggono?
 
-Eseguito da CLI, non importato da nessun altro modulo; non espone API e non
-scrive file. Legge data/derived/{score.tif,horizon.tif,dem_aeqd.tif}.
+Eseguito da CLI, non importato da nessun altro modulo. Legge
+data/derived/{score.tif,horizon.tif,dem_aeqd.tif} e scrive il report pubblico
+web/public/data/validation.json.
 Nessun dato personale. Istruzione utente: "gestisci accessibilita. Meteo
 mettilo nei to-do. Procedi"
 
@@ -12,6 +13,8 @@ Due verifiche indipendenti:
      (cime > colline > pianura > fondovalle alpino).
 """
 
+import datetime as dt
+import json
 import math
 import sys
 
@@ -19,7 +22,15 @@ import numpy as np
 import rasterio
 from pyproj import Transformer
 
-from config import AZ_MIN, AZ_STEP, CRS_WORK, DERIVED, R_EFF_M
+from config import (
+    AZ_MIN,
+    AZ_STEP,
+    CRS_WORK,
+    DERIVED,
+    HORIZON_MAX_RANGE_M,
+    R_EFF_M,
+    WEB_PUBLIC,
+)
 
 SCORE = DERIVED / "score.tif"
 HOR = DERIVED / "horizon.tif"
@@ -67,6 +78,20 @@ def sample(path, pts_xy):
         return np.array(list(src.sample(pts_xy)), dtype="float64").reshape(-1, n)
 
 
+def iso_time(tmin: float) -> str | None:
+    if tmin < 0:
+        return None
+    hh, mm = 19 + int(tmin) // 60, int(tmin) % 60
+    return f"{hh:02d}:{mm:02d} CEST"
+
+
+def finite_round(value: float, digits: int = 0) -> float | int | None:
+    """JSON standard: un nodata non deve diventare il token non valido NaN."""
+    if not np.isfinite(value):
+        return None
+    return round(float(value), digits)
+
+
 def main() -> int:
     fwd = Transformer.from_crs("EPSG:4326", CRS_WORK, always_xy=True)
     pts = [fwd.transform(lon, lat) for _, lat, lon, _ in SITES]
@@ -102,16 +127,59 @@ def main() -> int:
         f"{'sito':20s} {'quota':>6s} {'oriz.':>7s} {'visib.':>7s} {'teor.':>7s} "
         f"{'perdita':>8s} {'ora max':>8s}  attesa"
     )
+    samples = []
     for i in np.argsort(-sc[:, 0]):
         name, _, _, exp = SITES[i]
         vis, theo, tmin, horu = sc[i, 0] * 100, sc[i, 1] * 100, sc[i, 2], sc[i, 3]
-        hh, mm = 19 + int(tmin) // 60, int(tmin) % 60
-        ora = f"{hh:02d}:{mm:02d}" if tmin >= 0 else "--"
+        ora = iso_time(tmin) or "--"
         print(
             f"{name:20s} {dem[i]:5.0f}m {horu:6.2f}g {vis:6.1f}% {theo:6.1f}% "
             f"{theo - vis:7.1f}p {ora:>8s}  {exp}"
         )
-    return 0
+        samples.append({
+            "name": name,
+            "latitude": SITES[i][1],
+            "longitude": SITES[i][2],
+            "note": exp,
+            "elevation_m": finite_round(dem[i]),
+            "horizon_deg": finite_round(horu, 2),
+            "visible_obscuration_pct": finite_round(vis, 1),
+            "theoretical_obscuration_pct": finite_round(theo, 1),
+            "best_time": iso_time(tmin),
+        })
+
+    report = {
+        "schema": 1,
+        "generated_at": dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z"),
+        "data_generated_at": dt.datetime.fromtimestamp(
+            SCORE.stat().st_mtime, dt.UTC
+        ).isoformat().replace("+00:00", "Z"),
+        "event": "Eclisse solare parziale del 12 agosto 2026",
+        "model": {
+            "dem": "Copernicus GLO-90",
+            "analysis_resolution_m": 180,
+            "web_query_resolution_m": 250,
+            "horizon_max_range_km": HORIZON_MAX_RANGE_M / 1000,
+            "azimuth_step_deg": AZ_STEP,
+            "time_step_seconds": 20,
+        },
+        "analytic_horizon_check": {
+            "status": "pass" if ok else "fail",
+            "observer": "Torino centro",
+            "target": "Rocciamelone",
+            "distance_km": round(d / 1000, 1),
+            "azimuth_grid_deg": round(az, 1),
+            "expected_min_horizon_deg": round(ang, 2),
+            "raster_horizon_deg": round(float(letto), 2),
+            "tolerance_deg": 0.15,
+        },
+        "control_samples": samples,
+    }
+    WEB_PUBLIC.mkdir(parents=True, exist_ok=True)
+    output = WEB_PUBLIC / "validation.json"
+    output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+    print(f"\nReport pubblico: {output}")
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":

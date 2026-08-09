@@ -1,0 +1,312 @@
+{
+  "schema": 1,
+  "generated_at": "2026-08-09T01:17:18.282773Z",
+  "data_generated_at": "2026-08-08T18:06:30.767720Z",
+  "event": "Eclisse solare parziale del 12 agosto 2026",
+  "model": {
+    "dem": "Copernicus GLO-90",
+    "analysis_resolution_m": 180,
+    "web_query_resolution_m": 250,
+    "horizon_max_range_km": 150.0,
+    "azimuth_step_deg": 1.0,
+    "time_step_seconds": 20
+  },
+  "analytic_horizon_check": {
+    "status": "pass",
+    "observer": "Torino centro",
+    "target": "Rocciamelone",
+    "distance_km": 50.2,
+    "azimuth_grid_deg": 290.7,
+    "expected_min_horizon_deg": 3.56,
+    "raster_horizon_deg": 3.51,
+    "tolerance_deg": 0.15
+  },
+  "control_samples": [
+    {
+      "name": "Mondovi",
+      "latitude": 44.3956,
+      "longitude": 7.8164,
+      "note": "pedemontana sud",
+      "elevation_m": 420.0,
+      "horizon_deg": 1.98,
+      "visible_obscuration_pct": 94.5,
+      "theoretical_obscuration_pct": 94.5,
+      "best_time": "20:22 CEST"
+    },
+    {
+      "name": "La Morra (Langhe)",
+      "latitude": 44.6367,
+      "longitude": 7.9339,
+      "note": "collina, Alpi lontane",
+      "elevation_m": 466.0,
+      "horizon_deg": 1.63,
+      "visible_obscuration_pct": 94.2,
+      "theoretical_obscuration_pct": 94.2,
+      "best_time": "20:22 CEST"
+    },
+    {
+      "name": "Alessandria",
+      "latitude": 44.9133,
+      "longitude": 8.6156,
+      "note": "pianura orientale",
+      "elevation_m": 101.0,
+      "horizon_deg": 1.12,
+      "visible_obscuration_pct": 93.8,
+      "theoretical_obscuration_pct": 93.8,
+      "best_time": "20:21 CEST"
+    },
+    {
+      "name": "Superga (TO)",
+      "latitude": 45.0806,
+      "longitude": 7.7683,
+      "note": "collina sopra Torino",
+      "elevation_m": 667.0,
+      "horizon_deg": 2.69,
+      "visible_obscuration_pct": 93.4,
+      "theoretical_obscuration_pct": 93.7,
+      "best_time": "20:20 CEST"
+    },
+    {
+      "name": "Vercelli",
+      "latitude": 45.3206,
+      "longitude": 8.4183,
+      "note": "pianura, Alpi a ~90 km",
+      "elevation_m": 133.0,
+      "horizon_deg": 2.02,
+      "visible_obscuration_pct": 93.3,
+      "theoretical_obscuration_pct": 93.3,
+      "best_time": "20:21 CEST"
+    },
+    {
+      "name": "Novara",
+      "latitude": 45.4469,
+      "longitude": 8.6222,
+      "note": "pianura, Alpi lontane",
+      "elevation_m": 168.0,
+      "horizon_deg": 1.89,
+      "visible_obscuration_pct": 93.1,
+      "theoretical_obscuration_pct": 93.1,
+      "best_time": "20:20 CEST"
+    },
+    {
+      "name": "Punta Gnifetti",
+      "latitude": 45.9269,
+      "longitude": 7.8769,
+      "note": "cima: orizzonte ~0",
+      "elevation_m": 4499.0,
+      "horizon_deg": -1.06,
+      "visible_obscuration_pct": 92.7,
+      "theoretical_obscuration_pct": 92.7,
+      "best_time": "20:20 CEST"
+    },
+    {
+      "name": "Cuneo",
+      "latitude": 44.3841,
+      "longitude": 7.5426,
+      "note": "pianura sotto le Marittime",
+      "elevation_m": 554.0,
+      "horizon_deg": 2.67,
+      "visible_obscuration_pct": 92.7,
+      "theoretical_obscuration_pct": 94.6,
+      "best_time": "20:20 CEST"
+    },
+    {
+      "name": "Torino centro",
+      "latitude": 45.0703,
+      "longitude": 7.6869,
+      "note": "pianura sotto le Alpi",
+      "elevation_m": 248.0,
+      "horizon_deg": 3.5,
+      "visible_obscuration_pct": 85.5,
+      "theoretical_obscuration_pct": 93.7,
+      "best_time": "20:15 CEST"
+    },
+    {
+      "name": "Genova",
+      "latitude": 44.4056,
+      "longitude": 8.9463,
+      "note": "costa ligure, monti alle spalle",
+      "elevation_m": 13.0,
+      "horizon_deg": 2.67,
+      "visible_obscuration_pct": 82.3,
+      "theoretical_obscuration_pct": 94.3,
+      "best_time": "20:14 CEST"
+    },
+    {
+      "name": "Bari",
+      "latitude": 41.1171,
+      "longitude": 16.8719,
+      "note": "Adriatico, tramonto anticipato",
+      "elevation_m": 11.0,
+      "horizon_deg": 0.09,
+      "visible_obscuration_pct": 31.1,
+      "theoretical_obscuration_pct": 32.0,
+      "best_time": "19:53 CEST"
+    },
+    {
+      "name": "Roma",
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "note": "centro, Sole quasi al tramonto",
+      "elevation_m": 57.0,
+      "horizon_deg": 3.01,
+      "visible_obscuration_pct": 30.4,
+      "theoretical_obscuration_pct": 74.0,
+      "best_time": "19:54 CEST"
+    },
+    {
+      "name": "Trieste",
+      "latitude": 45.6495,
+      "longitude": 13.7768,
+      "note": "nord-est estremo, mare a ovest",
+      "elevation_m": 21.0,
+      "horizon_deg": 4.22,
+      "visible_obscuration_pct": 30.0,
+      "theoretical_obscuration_pct": 91.2,
+      "best_time": "19:48 CEST"
+    },
+    {
+      "name": "Sestriere",
+      "latitude": 44.9578,
+      "longitude": 6.8778,
+      "note": "alto ma circondato",
+      "elevation_m": 2040.0,
+      "horizon_deg": 8.69,
+      "visible_obscuration_pct": 24.1,
+      "theoretical_obscuration_pct": 94.1,
+      "best_time": "19:47 CEST"
+    },
+    {
+      "name": "Bolzano",
+      "latitude": 46.4983,
+      "longitude": 11.3548,
+      "note": "nord-est, conca fra i monti",
+      "elevation_m": 271.0,
+      "horizon_deg": 6.58,
+      "visible_obscuration_pct": 24.0,
+      "theoretical_obscuration_pct": 91.6,
+      "best_time": "19:44 CEST"
+    },
+    {
+      "name": "Biella",
+      "latitude": 45.5628,
+      "longitude": 8.0583,
+      "note": "pedemontana nord",
+      "elevation_m": 414.0,
+      "horizon_deg": 8.28,
+      "visible_obscuration_pct": 23.8,
+      "theoretical_obscuration_pct": 93.1,
+      "best_time": "19:46 CEST"
+    },
+    {
+      "name": "Etna (cima)",
+      "latitude": 37.751,
+      "longitude": 14.9934,
+      "note": "quota massima del sud",
+      "elevation_m": 3240.0,
+      "horizon_deg": -1.81,
+      "visible_obscuration_pct": 23.5,
+      "theoretical_obscuration_pct": 23.5,
+      "best_time": "19:55 CEST"
+    },
+    {
+      "name": "Monviso (cima)",
+      "latitude": 44.6673,
+      "longitude": 7.091,
+      "note": "cima: orizzonte ~0",
+      "elevation_m": 3648.0,
+      "horizon_deg": 9.4,
+      "visible_obscuration_pct": 14.2,
+      "theoretical_obscuration_pct": 94.4,
+      "best_time": "19:42 CEST"
+    },
+    {
+      "name": "Lecce",
+      "latitude": 40.3515,
+      "longitude": 18.175,
+      "note": "Salento: il minimo nazionale atteso",
+      "elevation_m": 50.0,
+      "horizon_deg": 1.12,
+      "visible_obscuration_pct": 6.8,
+      "theoretical_obscuration_pct": 18.8,
+      "best_time": "19:40 CEST"
+    },
+    {
+      "name": "Lampedusa",
+      "latitude": 35.5,
+      "longitude": 12.6,
+      "note": "estremo sud, orizzonte tutto marino",
+      "elevation_m": 8.0,
+      "horizon_deg": 2.04,
+      "visible_obscuration_pct": 6.4,
+      "theoretical_obscuration_pct": 26.9,
+      "best_time": "19:49 CEST"
+    },
+    {
+      "name": "Napoli",
+      "latitude": 40.8518,
+      "longitude": 14.2681,
+      "note": "sud, tramonta prima del massimo",
+      "elevation_m": 20.0,
+      "horizon_deg": 3.91,
+      "visible_obscuration_pct": 5.3,
+      "theoretical_obscuration_pct": 50.4,
+      "best_time": "19:40 CEST"
+    },
+    {
+      "name": "Palermo",
+      "latitude": 38.1157,
+      "longitude": 13.3615,
+      "note": "Sicilia nord",
+      "elevation_m": 26.0,
+      "horizon_deg": 4.28,
+      "visible_obscuration_pct": 0.0,
+      "theoretical_obscuration_pct": 37.7,
+      "best_time": "19:37 CEST"
+    },
+    {
+      "name": "Gran Sasso",
+      "latitude": 42.45,
+      "longitude": 13.5667,
+      "note": "sul fianco sotto il Corno Grande: coperto",
+      "elevation_m": 2083.0,
+      "horizon_deg": null,
+      "visible_obscuration_pct": 0.0,
+      "theoretical_obscuration_pct": 69.0,
+      "best_time": null
+    },
+    {
+      "name": "Stresa (Maggiore)",
+      "latitude": 45.885,
+      "longitude": 8.53,
+      "note": "Mottarone a ovest: coperto",
+      "elevation_m": 225.0,
+      "horizon_deg": null,
+      "visible_obscuration_pct": 0.0,
+      "theoretical_obscuration_pct": 92.6,
+      "best_time": null
+    },
+    {
+      "name": "Cagliari",
+      "latitude": 39.2238,
+      "longitude": 9.1217,
+      "note": "citta' bassa, colli a WNW: coperto",
+      "elevation_m": 31.0,
+      "horizon_deg": null,
+      "visible_obscuration_pct": 0.0,
+      "theoretical_obscuration_pct": 82.1,
+      "best_time": null
+    },
+    {
+      "name": "Bardonecchia",
+      "latitude": 45.0797,
+      "longitude": 6.6997,
+      "note": "fondovalle alpino chiuso: coperto",
+      "elevation_m": 1308.0,
+      "horizon_deg": null,
+      "visible_obscuration_pct": 0.0,
+      "theoretical_obscuration_pct": 94.0,
+      "best_time": null
+    }
+  ]
+}

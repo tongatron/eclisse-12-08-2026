@@ -43,19 +43,21 @@ RES_M = 90.0
 # raycast lavora su azimut di GRIGLIA: sommata la convergenza (+-4.4 gradi col
 # centro AEQD nazionale) servono 274.3-297.5, arrotondati con margine.
 AZ_MIN, AZ_MAX, AZ_STEP = 273.0, 298.0, 1.0
-MAX_RANGE_M = 250_000.0
+# A 150 km, con curvatura e rifrazione, un rilievo dovrebbe gia' superare
+# ~1,2° per ostruire il Sole alla quota critica dell'evento. Oltre non puo'
+# cambiare il punteggio: questo e' il limite effettivo del raycast.
+HORIZON_MAX_RANGE_M = 150_000.0
+# (distanza_massima_m, indice_piramide). I fattori della piramide mantengono
+# il campo lontano conservativo: ogni blocco usa la quota massima.
+HORIZON_PLAN = (
+    (10_000.0, 0),
+    (30_000.0, 1),
+    (80_000.0, 2),
+    (HORIZON_MAX_RANGE_M, 3),
+)
+HORIZON_POOL_FACTORS = (1, 4, 12, 24)
 R_EARTH_M = 6_371_000.0
 R_EFF_M = R_EARTH_M * 7.0 / 6.0  # curvatura + rifrazione standard
-
-# Passo del raycast: fine vicino, grossolano lontano.
-# (limite_m, passo_m)
-RAY_STEPS = [
-    (2_000.0, 45.0),
-    (10_000.0, 90.0),
-    (30_000.0, 250.0),
-    (80_000.0, 600.0),
-    (250_000.0, 1_500.0),
-]
 
 # --- Percorsi ---
 ROOT = pathlib.Path(__file__).resolve().parent.parent
