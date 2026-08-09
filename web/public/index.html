@@ -163,6 +163,12 @@
   .embed-open{flex:none;border:1px solid #2ea043;border-radius:6px;background:var(--acc);padding:6px 9px;
     color:#0d1117;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
   .embed-open:hover{background:#56d364}
+  /* La simulazione viene spostata fuori dal pannello laterale solo nella
+     versione incorporata e appare dopo la scelta di un punto. In questo modo
+     resta disponibile senza sottrarre spazio alla prima vista della mappa. */
+  body.embedded #sim-card{position:absolute;z-index:20;bottom:12px;left:12px;width:min(370px,calc(100% - 24px));
+    max-height:calc(100% - 76px);overflow:auto;margin:0;box-shadow:0 10px 28px rgba(0,0,0,.48)}
+  body.embedded #sim-card h2{font-size:11px}
 
   @media (max-width: 768px){
     /* Niente scroll di documento: scorre il pannello, non la pagina. Con il
@@ -192,6 +198,7 @@
     body.embedded #map{inset:52px 0 0}
     body.embedded #embed-header{padding:0 10px;gap:8px}
     body.embedded .embed-subtitle{display:none}
+    body.embedded #sim-card{bottom:10px;left:10px;width:calc(100% - 20px);max-height:calc(100% - 68px)}
   }
 
   /* Telefono in orizzontale: 46dvh di pannello lascerebbero una striscia di
@@ -295,6 +302,7 @@
   </details>
 
   <footer>
+    <p>Embed in your page: <a href="embed-test.html">prova la pagina demo</a></p>
     <p>Un progetto di <a href="https://tongatron.org" target="_blank" rel="noopener noreferrer">tongatron.org</a></p>
     <p>© 2026 Giovanni Bindi · contenuti <a href="https://creativecommons.org/licenses/by/4.0/deed.it" target="_blank" rel="license noopener noreferrer">CC BY 4.0</a> · <a href="affidabilita.html">affidabilità del dato</a> · <a href="https://github.com/tongatron/eclisse-12-08-2026" target="_blank" rel="noopener noreferrer">repository GitHub</a> · <a href="https://github.com/tongatron/eclisse-12-08-2026/blob/master/LICENSE" target="_blank" rel="license noopener noreferrer">codice MIT</a></p>
     <details>
@@ -316,7 +324,12 @@
 <script>
 const $ = s => document.querySelector(s);
 const EMBEDDED = new URLSearchParams(location.search).get('embed') === '1';
-if(EMBEDDED) document.body.classList.add('embedded');
+if(EMBEDDED){
+  document.body.classList.add('embedded');
+  // Nel layout embed il pannello laterale e' nascosto, ma la simulazione
+  // continua a usare gli stessi dati e controlli dell'app completa.
+  document.body.append(document.getElementById('sim-card'));
+}
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
