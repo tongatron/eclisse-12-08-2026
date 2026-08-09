@@ -10,4 +10,9 @@
       <image:title>Mappa della visibilità dell'eclisse solare del 12 agosto 2026 in Italia</image:title>
     </image:image>
   </url>
+  <url>
+    <loc>https://eclisse-12-08-2026.tongatron.org/metodo.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>

@@ -110,6 +110,9 @@
   label{display:flex;align-items:center;gap:7px;margin:5px 0;font-size:13px;cursor:pointer}
   input[type=range]{width:100%}
   .hint{color:var(--dim);font-size:12px}
+  .calculation-link{color:var(--acc);text-decoration:none;font-weight:600}
+  .calculation-link:hover{text-decoration:underline;color:#56d364}
+  .calculation-link:focus-visible{outline:2px solid #58a6ff;outline-offset:2px;border-radius:2px}
   .maplibregl-popup-content{background:var(--card);color:var(--txt);border:1px solid var(--line);
     border-radius:6px;font:13px/1.4 system-ui;padding:10px 12px}
   .maplibregl-popup-close-button{display:grid;place-items:center;top:6px;right:6px;width:28px;height:28px;
@@ -328,7 +331,7 @@
         il Sole deve restare sopra l'orizzonte locale, modellato dal terreno. La griglia di analisi
         arriva a 180 m; la vista nazionale è a 600 m e il valore al clic a 250 m.
         <br><br>
-        <a href="https://github.com/tongatron/eclisse-12-08-2026/blob/master/TECHNICAL.md" target="_blank" rel="noopener noreferrer">Documentazione tecnica →</a>
+        <a class="calculation-link" href="metodo.html">Guida interattiva ai calcoli →</a>
       </div>
     </div>
   </details>
@@ -336,7 +339,7 @@
   <footer>
     <p>Embed in your page: <a href="embed-test.html">prova la pagina demo</a></p>
     <p>Un progetto di <a href="https://tongatron.org" target="_blank" rel="noopener noreferrer">tongatron.org</a></p>
-    <p>© 2026 Giovanni Bindi · contenuti <a href="https://creativecommons.org/licenses/by/4.0/deed.it" target="_blank" rel="license noopener noreferrer">CC BY 4.0</a> · <a href="https://github.com/tongatron/eclisse-12-08-2026/blob/master/TECHNICAL.md" target="_blank" rel="noopener noreferrer">documentazione tecnica</a> · <a href="https://github.com/tongatron/eclisse-12-08-2026" target="_blank" rel="noopener noreferrer">repository GitHub</a> · <a href="https://github.com/tongatron/eclisse-12-08-2026/blob/master/LICENSE" target="_blank" rel="license noopener noreferrer">codice MIT</a></p>
+    <p>© 2026 Giovanni Bindi · contenuti <a href="https://creativecommons.org/licenses/by/4.0/deed.it" target="_blank" rel="license noopener noreferrer">CC BY 4.0</a> · <a href="metodo.html">guida ai calcoli</a> · <a href="https://github.com/tongatron/eclisse-12-08-2026/blob/master/TECHNICAL.md" target="_blank" rel="noopener noreferrer">documentazione tecnica</a> · <a href="https://github.com/tongatron/eclisse-12-08-2026" target="_blank" rel="noopener noreferrer">repository GitHub</a> · <a href="https://github.com/tongatron/eclisse-12-08-2026/blob/master/LICENSE" target="_blank" rel="license noopener noreferrer">codice MIT</a></p>
     <details>
       <summary>Licenze e riuso</summary>
       <p>Il codice del sito e della pipeline è rilasciato con licenza <a href="https://github.com/tongatron/eclisse-12-08-2026/blob/master/LICENSE" target="_blank" rel="license noopener noreferrer">MIT</a>. Testi, visualizzazioni e immagini originali sono rilasciati con licenza <a href="https://creativecommons.org/licenses/by/4.0/deed.it" target="_blank" rel="license noopener noreferrer">Creative Commons Attribuzione 4.0 Internazionale (CC BY 4.0)</a>, salvo diversa indicazione.</p>

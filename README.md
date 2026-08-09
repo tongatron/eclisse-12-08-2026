@@ -49,6 +49,8 @@ punto si ottengono oscuramento, orario, altezza del Sole e quota locale.
 - **Affidabilità verificabile**, con data dei dati, report della validazione,
   campioni territoriali e limiti d'uso nella
   [documentazione tecnica](TECHNICAL.md).
+- **Guida didattica interattiva**, con formule, grafici e un laboratorio per
+  confrontare posizione, quota del Sole e profilo di una montagna.
 
 ## Come funziona
 
@@ -58,8 +60,9 @@ né richiede un backend. La ricerca dei comuni usa un indice ISTAT incluso nel
 sito: ciò che si digita non viene inviato a servizi di geocoding esterni.
 
 Per calcoli, struttura dei dati, validazione e limiti noti, consulta la
-[documentazione tecnica](TECHNICAL.md). Per installare, eseguire o rigenerare
-gli asset, consulta la [guida della pipeline](pipeline/README.md).
+[guida interattiva ai calcoli](https://eclisse-12-08-2026.tongatron.org/metodo.html)
+e la [documentazione tecnica](TECHNICAL.md). Per installare, eseguire o
+rigenerare gli asset, consulta la [guida della pipeline](pipeline/README.md).
 
 ## Incorporare la mappa in un articolo
 

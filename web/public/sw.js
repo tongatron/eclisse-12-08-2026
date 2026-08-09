@@ -1,6 +1,7 @@
-const CACHE = 'punto-eclissi-shell-v3';
+const CACHE = 'punto-eclissi-shell-v4';
 const SHELL = [
   './',
+  './metodo.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',

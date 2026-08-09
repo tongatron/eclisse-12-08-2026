@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Come calcoliamo la visibilità — Punto Eclisse</title>
+<meta name="description" content="Una guida interattiva ai calcoli della visibilità dell'eclisse: effemeridi, geometria dei dischi e orizzonte reale.">
+<meta name="theme-color" content="#0d1117">
+<link rel="canonical" href="https://eclisse-12-08-2026.tongatron.org/metodo.html">
+<style>
+  :root{--bg:#0d1117;--surface:#161b22;--surface-2:#10161e;--line:#30363d;--text:#e6edf3;--muted:#8b949e;--green:#3fb950;--gold:#f4b942;--orange:#e07a4a;--blue:#79c0ff;--red:#ff7b72}
+  *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  a{color:#58a6ff} a:hover{color:#79c0ff}.shell{max-width:1100px;margin:auto;padding:0 24px 64px}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 0;border-bottom:1px solid var(--line);font-size:14px}.brand{color:var(--text);font-weight:750;text-decoration:none}.back{color:var(--green);text-decoration:none;font-weight:700}
+  .hero{padding:74px 0 48px;max-width:800px}.eyebrow{margin:0 0 12px;color:var(--green);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.hero h1{margin:0;font-size:clamp(38px,7vw,70px);line-height:1.02;letter-spacing:-.055em}.lead{margin:22px 0 0;color:#b8c4d0;font-size:clamp(18px,2.5vw,23px);line-height:1.45}.jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:30px}.jump a{padding:7px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:13px;text-decoration:none}.jump a:hover{border-color:var(--green);color:var(--green)}
+  section{padding:54px 0;border-top:1px solid var(--line)}h2{margin:0 0 12px;font-size:clamp(28px,4vw,42px);line-height:1.1;letter-spacing:-.035em}h3{margin:0 0 8px;font-size:18px}.intro{max-width:760px;margin:0 0 26px;color:#b8c4d0;font-size:17px}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.step{min-height:138px;padding:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px}.step b{display:block;margin-bottom:18px;color:var(--green);font-size:12px;letter-spacing:.1em}.step p{margin:0;color:#b8c4d0;font-size:14px;line-height:1.4}
+  .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.85fr);gap:28px;align-items:start}.card{padding:22px;background:var(--surface);border:1px solid var(--line);border-radius:14px}.formula{overflow:auto;margin:16px 0;padding:17px;border-left:3px solid var(--green);background:#0b1016;color:#e6edf3;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;line-height:1.7}.formula em{color:var(--gold);font-style:normal}.note{margin:14px 0 0;color:var(--muted);font-size:14px}.callout{border-left:3px solid var(--gold);padding:13px 15px;background:rgba(244,185,66,.07);color:#d9dfe7;font-size:14px}.definition{display:grid;grid-template-columns:80px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.definition:last-child{border-bottom:0}.definition b{color:var(--blue)}
+  .lab{padding:0;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:16px}.lab-head{padding:22px 22px 16px;border-bottom:1px solid var(--line)}.lab-head h3{font-size:22px}.lab-head p{margin:4px 0 0;color:var(--muted);font-size:14px}.lab-grid{display:grid;grid-template-columns:280px minmax(0,1fr)}.controls{padding:18px 20px;border-right:1px solid var(--line);background:#111820}.control{margin:0 0 17px}.control:last-child{margin-bottom:0}.control label{display:flex;justify-content:space-between;gap:12px;color:#c9d1d9;font-size:13px;font-weight:650}.value{color:var(--gold);font-variant-numeric:tabular-nums}input[type=range]{width:100%;margin:8px 0 0;accent-color:var(--green)}.visual{padding:16px 20px 20px}.readout{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.metric{padding:10px;background:#0b1016;border:1px solid #222c37;border-radius:8px}.metric span{display:block;color:var(--muted);font-size:11px}.metric b{display:block;margin-top:2px;color:var(--text);font-size:16px;font-variant-numeric:tabular-nums}.status{grid-column:span 3;padding:11px 12px;border-radius:8px;font-size:14px;font-weight:700}.status.visible{background:rgba(63,185,80,.14);color:#7ee787}.status.hidden{background:rgba(224,122,74,.14);color:#ffab70}.lab-caption{margin:13px 0 0;color:var(--muted);font-size:13px}.diagram{display:block;width:100%;height:auto;max-height:360px;background:#0b1016;border:1px solid #222c37;border-radius:10px}.svg-label{fill:#b8c4d0;font:12px ui-sans-serif,system-ui}.svg-small{fill:#8b949e;font:11px ui-sans-serif,system-ui}.svg-number{fill:#f4b942;font:700 13px ui-monospace,monospace}.vis-sun{fill:#f4b942}.vis-ray{stroke:#f4b942;stroke-width:2;stroke-dasharray:5 4}.vis-mountain{fill:#5f6f7f;stroke:#8b98a8;stroke-width:1}.vis-ground{fill:#18232d}.vis-horizon{stroke:#79c0ff;stroke-width:1.5;stroke-dasharray:4 4}.vis-block{stroke:#e07a4a;stroke-width:3}
+  .disc-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center}.disc{width:min(100%,280px);margin:auto;aspect-ratio:1;display:block}.eq-list{margin:0;padding-left:20px;color:#b8c4d0}.eq-list li{padding:4px 0}.timeline{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:20px}.timeline:before{position:absolute;top:20px;left:10%;right:10%;height:2px;background:var(--line);content:""}.time-node{position:relative;z-index:1;text-align:center}.dot{width:14px;height:14px;margin:14px auto 8px;border:3px solid var(--surface);border-radius:50%;background:var(--blue)}.time-node:nth-child(4) .dot{width:20px;height:20px;margin-top:11px;background:var(--gold)}.time-node span{display:block;color:var(--muted);font-size:12px}.time-node b{display:block;font-size:13px}
+  .case{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:stretch}.case .number{margin:2px 0;color:var(--gold);font-size:42px;font-weight:800;letter-spacing:-.05em}.case p{margin:7px 0;color:#b8c4d0}.compare{display:grid;grid-template-columns:1fr 1fr;gap:1px;overflow:hidden;border:1px solid var(--line);border-radius:10px;background:var(--line)}.compare div{padding:14px;background:var(--surface-2)}.compare span{display:block;color:var(--muted);font-size:12px}.compare b{font-size:24px;color:var(--text)}
+  .limits{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.limits .card{padding:18px}.limits p{margin:5px 0 0;color:var(--muted);font-size:14px}footer{padding:28px 0 0;color:var(--muted);font-size:13px}footer p{margin:4px 0}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  @media(max-width:760px){.shell{padding:0 16px 44px}.hero{padding:50px 0 36px}.steps,.limits{grid-template-columns:1fr 1fr}.two,.case{grid-template-columns:1fr}.lab-grid{grid-template-columns:1fr}.controls{border-right:0;border-bottom:1px solid var(--line)}.disc-grid{grid-template-columns:1fr}.timeline{grid-template-columns:repeat(3,1fr);row-gap:18px}.timeline:before{display:none}.readout{grid-template-columns:1fr 1fr}.status{grid-column:span 2}}
+  @media(max-width:430px){.steps,.limits{grid-template-columns:1fr}.top{font-size:12px}.readout{grid-template-columns:1fr}.status{grid-column:span 1}.compare{grid-template-columns:1fr}.formula{font-size:13px}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <nav class="top" aria-label="Navigazione">
+    <a class="brand" href="./">Punto Eclisse</a>
+    <a class="back" href="./">← Torna alla mappa</a>
+  </nav>
+
+  <header class="hero">
+    <p class="eyebrow">Metodo di calcolo</p>
+    <h1>Il Sole non basta:<br>serve anche il tuo orizzonte.</h1>
+    <p class="lead">La mappa cerca il massimo oscuramento in un istante in cui il Sole è davvero osservabile: sopra l’orizzonte astronomico e sopra montagne, colline o costa nella sua direzione.</p>
+    <nav class="jump" aria-label="Indice della guida"><a href="#dati">I quattro calcoli</a><a href="#sole">Sole e Luna</a><a href="#laboratorio">Laboratorio</a><a href="#tempo">Decisione nel tempo</a><a href="#verifica">Verifica</a></nav>
+  </header>
+
+  <section id="dati">
+    <p class="eyebrow">La catena logica</p>
+    <h2>Quattro domande, per ogni cella della mappa</h2>
+    <p class="intro">Il dato finale non è l’oscuramento “sulla carta”: è il massimo fra gli oscuramenti che passano tutti i controlli geometrici.</p>
+    <div class="steps">
+      <article class="step"><b>01 · DOVE</b><h3>Posizione</h3><p>Latitudine, longitudine e quota della cella di terreno.</p></article>
+      <article class="step"><b>02 · QUANDO</b><h3>Effemeridi</h3><p>Altezza, azimut e sovrapposizione Sole–Luna ogni 20 secondi.</p></article>
+      <article class="step"><b>03 · COSA OSTRUISCE</b><h3>Orizzonte</h3><p>Il punto più alto del profilo del terreno lungo il raggio verso il Sole.</p></article>
+      <article class="step"><b>04 · RISULTATO</b><h3>Massimo visibile</h3><p>Il valore più alto ottenuto mentre il Sole resta libero.</p></article>
+    </div>
+  </section>
+
+  <section id="sole">
+    <div class="two">
+      <div>
+        <p class="eyebrow">1 · Geometria del cielo</p>
+        <h2>Dal tempo alla posizione del Sole</h2>
+        <p class="intro">Per il luogo e l’istante considerati, le effemeridi forniscono l’altezza apparente <i>α</i> e l’azimut vero <i>A</i> del Sole. L’azimut è misurato da nord in senso orario: ovest è 270°.</p>
+        <div class="formula">Sole utile in cielo  ⟺  <em>α<sub>sole</sub> &gt; 0°</em></div>
+        <p>Il modello usa l’altezza <em>apparente</em>, cioè con la rifrazione atmosferica. È importante vicino al tramonto: confrontiamo così due quantità che rappresentano entrambe ciò che vede l’osservatore.</p>
+      </div>
+      <aside class="card" aria-label="Definizioni geometriche">
+        <div class="definition"><b>α</b><span><strong>Altezza</strong><br>Angolo sopra l’orizzonte locale: 0° all’orizzonte, 90° allo zenit.</span></div>
+        <div class="definition"><b>A</b><span><strong>Azimut</strong><br>Direzione sul piano orizzontale; durante l’evento in Italia il Sole è fra W e WNW.</span></div>
+        <div class="definition"><b>γ</b><span><strong>Convergenza</strong><br>Correzione che trasforma l’azimut vero nell’azimut della griglia cartografica.</span></div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="dischi">
+    <div class="two">
+      <div>
+        <p class="eyebrow">2 · Copertura geometrica</p>
+        <h2>Quanto Sole copre davvero la Luna?</h2>
+        <p class="intro">Si misura l’area di intersezione fra due dischi apparenti, non la sola sovrapposizione dei diametri. I raggi angolari dipendono dalla distanza istantanea di Sole e Luna.</p>
+        <div class="formula">O = [A<sub>intersezione</sub>(d, r<sub>S</sub>, r<sub>L</sub>)] / [π r<sub>S</sub>²]</div>
+        <ul class="eq-list"><li><i>d</i> è la separazione angolare fra i centri dei dischi.</li><li><i>r<sub>S</sub></i> e <i>r<sub>L</sub></i> sono i raggi angolari apparenti.</li><li><i>O</i> va da 0 a 1 e viene poi mostrato in percentuale.</li></ul>
+      </div>
+      <div class="card">
+        <svg class="disc" viewBox="0 0 280 280" role="img" aria-label="Due dischi sovrapposti rappresentano il Sole e la Luna">
+          <defs><clipPath id="sunclip"><circle cx="130" cy="140" r="86"/></clipPath></defs>
+          <circle cx="130" cy="140" r="86" fill="#f4b942" opacity=".94"/><circle cx="177" cy="119" r="82" fill="#0d1117" stroke="#e6edf3" stroke-width="2"/>
+          <path d="M130 54a86 86 0 0 1 74 43a82 82 0 0 0-74 129z" clip-path="url(#sunclip)" fill="#e07a4a" opacity=".65"/>
+          <line x1="130" y1="140" x2="177" y2="119" stroke="#79c0ff" stroke-width="2"/><circle cx="130" cy="140" r="3" fill="#79c0ff"/><circle cx="177" cy="119" r="3" fill="#79c0ff"/>
+          <text x="57" y="246" class="svg-label">Sole</text><text x="183" y="40" class="svg-label">Luna</text><text x="147" y="118" class="svg-small">d</text>
+        </svg>
+        <p class="note">La curva di oscuramento teorico è calcolata per ogni istante, prima di decidere se il Sole sia visibile.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="laboratorio">
+    <p class="eyebrow">3 · Laboratorio geometrico</p>
+    <h2>Prova il confronto fra posizione, Sole e montagna</h2>
+    <p class="intro">Muovi i cursori: il laboratorio calcola l’angolo della vetta visto dall’osservatore e lo confronta con l’altezza del Sole. La direzione deve anche coincidere con l’azimut del Sole.</p>
+    <div class="lab">
+      <div class="lab-head"><h3>Un raggio, un profilo, una decisione</h3><p>Scenario iniziale: Torino centro e Rocciamelone, usato anche nel controllo analitico della pipeline.</p></div>
+      <div class="lab-grid">
+        <div class="controls">
+          <div class="control"><label for="obs"><span>Quota osservatore</span><output id="obsOut" class="value"></output></label><input id="obs" type="range" min="0" max="1800" value="248" step="10"></div>
+          <div class="control"><label for="peak"><span>Quota vetta</span><output id="peakOut" class="value"></output></label><input id="peak" type="range" min="100" max="4000" value="3538" step="10"></div>
+          <div class="control"><label for="distance"><span>Distanza vetta</span><output id="distanceOut" class="value"></output></label><input id="distance" type="range" min="1" max="150" value="50.2" step=".1"></div>
+          <div class="control"><label for="sunAlt"><span>Altezza del Sole</span><output id="sunAltOut" class="value"></output></label><input id="sunAlt" type="range" min="0" max="12" value="3.2" step=".1"></div>
+          <div class="control"><label for="sunAz"><span>Azimut del Sole</span><output id="sunAzOut" class="value"></output></label><input id="sunAz" type="range" min="270" max="300" value="290.7" step=".1"></div>
+          <div class="control"><label for="mountAz"><span>Azimut della vetta</span><output id="mountAzOut" class="value"></output></label><input id="mountAz" type="range" min="270" max="300" value="290.7" step=".1"></div>
+          <div class="control"><label for="width"><span>Larghezza angolare del rilievo</span><output id="widthOut" class="value"></output></label><input id="width" type="range" min=".2" max="8" value="2" step=".1"></div>
+        </div>
+        <div class="visual">
+          <svg id="terrainSvg" class="diagram" viewBox="0 0 680 355" role="img" aria-live="polite" aria-label="Profilo laterale di terreno e raggio del Sole"></svg>
+          <div class="readout">
+            <div class="metric"><span>Abbassamento curvatura</span><b id="dropOut">–</b></div>
+            <div class="metric"><span>Orizzonte della vetta</span><b id="horizonOut">–</b></div>
+            <div class="metric"><span>Scarto azimut</span><b id="azOut">–</b></div>
+            <div id="status" class="status">–</div>
+          </div>
+          <p class="lab-caption" id="labCaption">–</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:16px"><strong>Formula usata dal profilo.</strong> Il raggio terrestre efficace è R<sub>eff</sub> = 7/6 · R<sub>Terra</sub>: integra in modo standard curvatura e rifrazione. Se il rilievo non cade nella direzione del Sole, non è quello a limitare la vista.</div>
+  </section>
+
+  <section id="tempo">
+    <p class="eyebrow">4 · La scelta nel tempo</p>
+    <h2>Non basta il massimo teorico: scegliamo il massimo valido</h2>
+    <p class="intro">Il programma ripete il confronto a intervalli di 20 secondi, per ogni cella. Conserva il valore di copertura più alto solo quando entrambe le condizioni di visibilità sono vere.</p>
+    <div class="formula">O<sub>visibile</sub> = max<sub>t</sub> { O(t)  se  α<sub>sole</sub>(t) &gt; max[0°, h<sub>orizzonte</sub>(A<sub>sole</sub>,t)] }</div>
+    <div class="timeline" aria-label="Sequenza temporale del calcolo">
+      <div class="time-node"><div class="dot"></div><b>19:25</b><span>inizio locale</span></div>
+      <div class="time-node"><div class="dot"></div><b>ogni 20 s</b><span>effemeridi</span></div>
+      <div class="time-node"><div class="dot"></div><b>confronto</b><span>Sole / orizzonte</span></div>
+      <div class="time-node"><div class="dot"></div><b>picco valido</b><span>massimo salvato</span></div>
+      <div class="time-node"><div class="dot"></div><b>tramonto</b><span>fine utile</span></div>
+    </div>
+  </section>
+
+  <section id="verifica">
+    <div class="case">
+      <div class="card"><p class="eyebrow">Controllo indipendente</p><h2>Torino → Rocciamelone</h2><p>Da Torino centro, il Rocciamelone (3.538 m) è a 50,2 km nella direzione di 290,7°. Si può calcolare l’angolo della vetta direttamente, senza leggere il raster.</p><div class="formula">h = arctan[(3538 − 248 − drop) / 50 200] = <em>3,56°</em></div><p>Il raster della pipeline restituisce 3,51°: differenza 0,05°, entro la tolleranza di 0,15°.</p></div>
+      <div class="card"><p class="eyebrow">Impatto sul dato</p><div class="number">−8,2 pt</div><p>Nel campione di Torino il massimo teorico è 93,7%, ma quello visibile scende a 85,5% perché il rilievo chiude la parte più favorevole della fase finale.</p><div class="compare"><div><span>Massimo teorico</span><b>93,7%</b></div><div><span>Massimo visibile</span><b>85,5%</b></div></div></div>
+    </div>
+  </section>
+
+  <section id="limiti">
+    <p class="eyebrow">Come leggere il risultato</p>
+    <h2>Accurato sul terreno, non una garanzia sul posto</h2>
+    <div class="limits">
+      <article class="card"><h3>Risoluzione</h3><p>DEM Copernicus GLO-90, analisi a 180 m e valore al clic a 250 m: ostacoli molto vicini restano fuori modello.</p></article>
+      <article class="card"><h3>Cosa manca</h3><p>Alberi, edifici, meteo, proprietà privata, accessibilità e sicurezza non sono inclusi nel punteggio.</p></article>
+      <article class="card"><h3>Uso pratico</h3><p>La mappa serve a confrontare aree. Per osservare, controlla sempre dal vivo che l’orizzonte W–WNW sia libero.</p></article>
+    </div>
+  </section>
+
+  <footer><p><a href="./">Apri la mappa interattiva</a> · <a href="https://github.com/tongatron/eclisse-12-08-2026/blob/master/TECHNICAL.md" target="_blank" rel="noopener noreferrer">Documentazione tecnica completa</a></p><p>© 2026 Giovanni Bindi — contenuti CC BY 4.0.</p></footer>
+</main>
+<script>
+  const ids = ['obs','peak','distance','sunAlt','sunAz','mountAz','width'];
+  const $ = id => document.getElementById(id);
+  const radians = deg => deg * Math.PI / 180;
+  const fmt = (n,d=1) => Number(n).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d});
+  function azDifference(a,b){ return Math.abs(((a-b+540)%360)-180); }
+  function renderLab(){
+    const obs=+$('obs').value, peak=+$('peak').value, km=+$('distance').value, sunAlt=+$('sunAlt').value, sunAz=+$('sunAz').value, mountAz=+$('mountAz').value, width=+$('width').value;
+    const d=km*1000, rEff=6371000*7/6, drop=d*d/(2*rEff);
+    const rawHorizon=Math.atan2(peak-obs-drop,d)*180/Math.PI;
+    const delta=azDifference(sunAz,mountAz), aligned=delta<=width/2;
+    const horizon=aligned ? rawHorizon : 0;
+    const visible=sunAlt>0 && sunAlt>horizon;
+    $('obsOut').textContent=fmt(obs,0)+' m'; $('peakOut').textContent=fmt(peak,0)+' m'; $('distanceOut').textContent=fmt(km,1)+' km';
+    $('sunAltOut').textContent=fmt(sunAlt)+'°'; $('sunAzOut').textContent=fmt(sunAz)+'°'; $('mountAzOut').textContent=fmt(mountAz)+'°'; $('widthOut').textContent=fmt(width)+'°';
+    $('dropOut').textContent=fmt(drop,0)+' m'; $('horizonOut').textContent=fmt(rawHorizon)+'°'; $('azOut').textContent=fmt(delta)+'°';
+    const status=$('status'); status.className='status '+(visible?'visible':'hidden');
+    if(!aligned){status.textContent='✓ Sole visibile: il rilievo non è nella sua direzione';}
+    else if(visible){status.textContent='✓ Sole visibile: '+fmt(sunAlt)+'° è sopra l’orizzonte di '+fmt(horizon)+'°';}
+    else{status.textContent='× Sole coperto: '+fmt(sunAlt)+'° non supera l’orizzonte di '+fmt(horizon)+'°';}
+    $('labCaption').textContent=aligned ? 'Il rilievo occupa la direzione del Sole (scarto '+fmt(delta)+'°, ampiezza ±'+fmt(width/2)+'°).' : 'Il Sole è fuori dall’ampiezza del rilievo: qui il modello confronta con l’orizzonte marino/piatto, non con questa vetta.';
+    const svg=$('terrainSvg');
+    const xO=85, baseY=290, xM=545, scaleY=0.045;
+    const visualPeakY=Math.max(70,baseY-(peak-obs-drop)*scaleY);
+    const sunX=610, sunY=Math.max(28,baseY-(sunAlt*Math.PI/180)*(sunX-xO));
+    const hY=Math.max(28,baseY-(rawHorizon*Math.PI/180)*(xM-xO));
+    const rayClass=visible?'vis-ray':'vis-block';
+    const mountainPath=`M ${xM-62} ${baseY} L ${xM-18} ${Math.min(baseY-22,visualPeakY+64)} L ${xM} ${visualPeakY} L ${xM+30} ${Math.min(baseY-20,visualPeakY+72)} L ${xM+74} ${baseY} Z`;
+    svg.innerHTML=`<rect width="680" height="355" fill="#0b1016"/><path class="vis-ground" d="M0 ${baseY} L680 ${baseY} L680 355 L0 355 Z"/><path class="vis-mountain" d="${mountainPath}"/><line x1="${xO}" y1="${baseY}" x2="${xM}" y2="${hY}" class="vis-horizon"/><line x1="${xO}" y1="${baseY}" x2="${sunX}" y2="${sunY}" class="${rayClass}"/><line x1="${xO}" y1="${baseY}" x2="${xM}" y2="${baseY}" stroke="#30363d" stroke-width="1"/><circle cx="${xO}" cy="${baseY}" r="5" fill="#79c0ff"/><circle cx="${sunX}" cy="${sunY}" r="13" class="vis-sun"/><path d="M${xO+32} ${baseY} A32 32 0 0 0 ${xO+31*Math.cos(radians(sunAlt))} ${baseY-31*Math.sin(radians(sunAlt))}" fill="none" stroke="#f4b942" stroke-width="1.5"/><text x="${xO-36}" y="${baseY+24}" class="svg-label">tu · ${fmt(obs,0)} m</text><text x="${xM-46}" y="${visualPeakY-10}" class="svg-label">vetta · ${fmt(peak,0)} m</text><text x="${xO+115}" y="${baseY-17}" class="svg-number">α Sole = ${fmt(sunAlt)}°</text><text x="${xM-190}" y="${hY-8}" class="svg-small">orizzonte = ${fmt(rawHorizon)}°</text><text x="${xM-110}" y="${baseY+24}" class="svg-small">${fmt(km,1)} km · curvatura ${fmt(drop,0)} m</text><text x="${sunX-20}" y="${sunY-21}" class="svg-label">Sole</text>`;
+  }
+  ids.forEach(id => $(id).addEventListener('input',renderLab));
+  renderLab();
+</script>
+</body>
+</html>
