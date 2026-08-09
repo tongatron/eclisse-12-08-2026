@@ -43,6 +43,9 @@ punto si ottengono oscuramento, orario, altezza del Sole e quota locale.
 - **Geolocalizzazione su richiesta**, condivisibile solo se l'utente lo sceglie.
 - **Esperienza mobile e PWA**, con pannello richiudibile per lasciare la mappa
   a tutto schermo.
+- **Embed per articoli**, con mappa interattiva, risultato al clic e
+  simulazione compatta dell’eclisse, adattata alla larghezza di una colonna
+  editoriale.
 - **Affidabilità verificabile**, con data dei dati, report della validazione,
   campioni territoriali e limiti d'uso pubblicati nella
   [pagina dedicata](https://eclisse-12-08-2026.tongatron.org/affidabilita.html).
@@ -57,6 +60,30 @@ sito: ciò che si digita non viene inviato a servizi di geocoding esterni.
 Per calcoli, struttura dei dati, validazione e limiti noti, consulta la
 [documentazione tecnica](TECHNICAL.md). Per installare, eseguire o rigenerare
 gli asset, consulta la [guida della pipeline](pipeline/README.md).
+
+## Incorporare la mappa in un articolo
+
+La versione incorporabile è disponibile a questo URL:
+
+`https://eclisse-12-08-2026.tongatron.org/?embed=1`
+
+In WordPress, incolla il seguente codice in un blocco **HTML personalizzato**:
+
+```html
+<iframe src="https://eclisse-12-08-2026.tongatron.org/?embed=1"
+  width="100%" height="540" frameborder="0" loading="lazy"
+  title="Mappa della visibilità dell'eclisse solare"
+  allow="geolocation"></iframe>
+```
+
+L’embed privilegia la mappa: facendo clic su un punto, il lettore vede il
+valore calcolato e la simulazione dell’eclisse. Il pannello della simulazione
+può essere chiuso e, se coprirebbe il risultato selezionato, viene spostato
+automaticamente dall’altro lato della mappa. Il pulsante **Apri la mappa**
+porta alla versione completa, con ricerca dei comuni e dettagli aggiuntivi.
+
+Per verificare l’integrazione in una colonna editoriale, apri la
+[pagina di test](https://eclisse-12-08-2026.tongatron.org/embed-test.html).
 
 ## Pubblicazione e aggiornamenti
 
