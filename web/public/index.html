@@ -425,7 +425,16 @@ function fitMobilePanel(){
     return;
   }
   const maxHeight = Math.floor(window.innerHeight * 0.46);
-  const contentHeight = Math.ceil(mobileSide.scrollHeight);
+  // scrollHeight non e' utile qui: non puo' essere minore dell'altezza gia'
+  // assegnata al pannello (46dvh). Misuriamo quindi l'ultimo elemento
+  // visibile, includendo il suo margine e il padding inferiore.
+  const sideTop = mobileSide.getBoundingClientRect().top;
+  const contentBottom = [...mobileSide.children].reduce((bottom, child) => {
+    if(getComputedStyle(child).display === 'none') return bottom;
+    const rect = child.getBoundingClientRect();
+    return Math.max(bottom, rect.bottom - sideTop + parseFloat(getComputedStyle(child).marginBottom));
+  }, 0);
+  const contentHeight = Math.ceil(contentBottom + parseFloat(getComputedStyle(mobileSide).paddingBottom));
   document.documentElement.style.setProperty('--radar-panel-h', Math.min(maxHeight, contentHeight) + 'px');
   map.resize();
 }
