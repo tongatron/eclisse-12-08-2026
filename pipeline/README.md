@@ -42,6 +42,7 @@ Lo stadio `05_access.py` è opzionale e sperimentale: non alimenta la mappa pubb
 | `04_score.py` | Combina effemeridi e orizzonte locale | orizzonte e DEM | `score.tif` |
 | `05_access.py` *(opzionale)* | Stima la distanza dalla strada percorribile più vicina | `score.tif`, estratto OSM | `access.tif` |
 | `06_export.py` | Prepara immagini e tasselli per il browser | `score.tif`, `obs.tif` | `web/public/data/` |
+| `build_comuni_index.py` | Prepara la ricerca locale dei comuni | codici e confini ISTAT | `web/public/data/comuni.json` |
 | `validate.py` | Esegue controlli di coerenza | raster derivati | solo output a console |
 
 ## Dettaglio degli stadi
@@ -94,6 +95,26 @@ python pipeline/05_access.py
 - `web/public/data/meta.json`: bounding box, risoluzione e schema di codifica.
 
 L'export elimina e ricrea i PNG presenti in `web/public/data/tiles/`. Prima di eseguirlo, assicurarsi di non avere modifiche manuali da conservare in quella cartella.
+
+### 7. Aggiornare l'indice locale dei comuni
+
+La ricerca sul sito non usa servizi di geocoding esterni. `comuni.json` contiene
+nome, provincia, eventuale denominazione bilingue e centro geometrico di tutti i
+comuni; è generato dai [codici ISTAT](https://www.istat.it/classificazione/codici-dei-comuni-delle-province-e-delle-regioni/)
+e dai [confini amministrativi ISTAT](https://www.istat.it/notizia/confini-delle-unita-amministrative-a-fini-statistici-al-1-gennaio-2018-2/).
+
+Aggiornare l'indice solo quando ISTAT pubblica una nuova edizione di uno dei due
+file. Lo script usa esclusivamente la libreria standard di Python:
+
+```bash
+python pipeline/build_comuni_index.py \
+  --codes-xlsx /percorso/Elenco-comuni-italiani.xlsx \
+  --boundaries-zip /percorso/Limiti01012026_g.zip
+```
+
+Il centro geometrico serve a posizionare la mappa nel comune, non identifica un
+capoluogo né un punto consigliato per l'osservazione. Dopo l'aggiornamento,
+controllare il numero dei comuni stampato dallo script e incrementare `ASSET_V`.
 
 ## Validazione e pubblicazione
 

@@ -29,11 +29,27 @@ quota, coordinate e la simulazione dell'eclisse nel punto selezionato.*
 La mappa mostra il risultato nazionale a colpo d'occhio. Facendo clic su un
 punto si ottengono oscuramento, orario, altezza del Sole e quota locale.
 
+## Funzionalità
+
+- **Mappa nazionale interattiva** con la copertura massima realmente visibile,
+  calcolata considerando orografia, curvatura terrestre e rifrazione.
+- **Analisi puntuale** con percentuale di oscuramento, orari locali, quota,
+  coordinate e collegamento condivisibile.
+- **Simulazione nel tempo** dell'eclisse nel punto selezionato, con distinzione
+  fra Sole visibile, tramonto e orizzonte ostruito dai rilievi.
+- **Ricerca di tutti i comuni italiani**, locale e istantanea: l'indice ISTAT
+  include province e denominazioni bilingui, senza inviare ciò che si digita a
+  servizi di geocoding esterni.
+- **Geolocalizzazione su richiesta**, condivisibile solo se l'utente lo sceglie.
+- **Esperienza mobile e PWA**, con pannello richiudibile per lasciare la mappa
+  a tutto schermo.
+
 ## Come funziona
 
 Il sito è completamente statico: i raster sono calcolati offline a partire
 dal DEM Copernicus e pubblicati con GitHub Pages. Non raccoglie dati personali
-né richiede un backend.
+né richiede un backend. La ricerca dei comuni usa un indice ISTAT incluso nel
+sito: ciò che si digita non viene inviato a servizi di geocoding esterni.
 
 Per calcoli, struttura dei dati, validazione e limiti noti, consulta la
 [documentazione tecnica](TECHNICAL.md). Per installare, eseguire o rigenerare
@@ -48,8 +64,9 @@ interazioni sulla mappa.
 Per aggiornare i dati:
 
 1. esegui la [pipeline di elaborazione](pipeline/README.md);
-2. aggiorna `ASSET_V` in `web/public/index.html` quando cambiano gli asset;
-3. fai commit e push su `master`.
+2. aggiorna l'indice dei comuni se ISTAT ha pubblicato una nuova versione;
+3. aggiorna `ASSET_V` in `web/public/index.html` quando cambiano gli asset;
+4. fai commit e push su `master`.
 
 ## Licenza
 

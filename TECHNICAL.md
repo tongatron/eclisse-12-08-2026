@@ -51,6 +51,7 @@ web/public/                sito statico pubblicato da GitHub Pages
   data/score.png           heatmap nazionale a 600 m
   data/meta.json           griglia, bounding box e legenda
   data/tiles/              dati di dettaglio a 250 m
+  data/comuni.json         indice locale dei 7.894 comuni per la ricerca
 ```
 
 All'avvio il browser carica solo `score.png`. I valori mostrati al clic
@@ -126,10 +127,16 @@ dei dati.
 
 ## Frontend e cache
 
-`web/public/index.html` usa MapLibre GL per la mappa, Nominatim per la ricerca
-dei comuni e tile di base OpenStreetMap. Le risorse dati sono richieste con un
-parametro `?v=ASSET_V`: quando si rigenerano raster o tasselli, incrementare
-quella costante evita che il browser riusi dati non coerenti dalla cache.
+`web/public/index.html` usa MapLibre GL per la mappa, un indice locale ISTAT
+per la ricerca dei comuni e tile di base OpenStreetMap. La ricerca non invia il
+testo digitato a servizi di geocoding esterni. `data/comuni.json` contiene
+nome, provincia, eventuale denominazione bilingue e centro geometrico del
+comune; è generato da `pipeline/build_comuni_index.py` a partire dai codici e
+dai confini ISTAT.
+
+Le risorse dati sono richieste con un parametro `?v=ASSET_V`: quando si
+rigenerano raster, tasselli o indice dei comuni, incrementare quella costante
+evita che il browser riusi dati non coerenti dalla cache.
 
 Il service worker in `web/public/sw.js` consente l'uso offline delle risorse
 già visitate.
@@ -160,7 +167,7 @@ only verso `tongatron.github.io`.
 | Rete stradale | OpenStreetMap / Geofabrik | ODbL; non usata dalla mappa nazionale |
 | Effemeridi | astronomy-engine, Don Cross | MIT |
 | Tile di base | OpenStreetMap | rispettare la tile usage policy |
-| Geocoding | Nominatim / OpenStreetMap | adatto a uso moderato; rispettare la usage policy |
+| Indice dei comuni | ISTAT, codici e confini delle unità amministrative | incorporato nel sito; codici aggiornati al 21 febbraio 2026, confini al 1 gennaio 2026 |
 
 I marchi, le mappe di base, i dati e i servizi di terze parti restano soggetti
 alle rispettive licenze e condizioni.
